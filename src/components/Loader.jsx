@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+
 import loader from "../assets/images/preloader.gif";
 
 const Loader = () => {

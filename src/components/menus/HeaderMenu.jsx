@@ -11,10 +11,12 @@ const HeaderMenu = () => {
     const navigate = useNavigate();
 
     let role = null;
+    let userName = null;
 
     if (token) {
         const decoded = jwtDecode(token);
         role = decoded.role;
+        userName = decoded.username;
     }
 
     const profilePath =
@@ -32,7 +34,7 @@ const HeaderMenu = () => {
             <div onClick={toggleMenu} className='py-2 px-2 flex items-center gap-2 cursor-pointer hover:bg-[#4169e1] hover:text-white transition-colors duration-400'>
                 <img src={user} alt="user" className='h-8 rounded-full' />
                 <div className='flex items-center gap-1'>
-                    <p className='text-sm'>{role}</p>
+                    <p className='text-sm'>{userName}</p>
                     <ChevronDown
                         size={15}
                         className="mt-0.5"

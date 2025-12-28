@@ -72,7 +72,7 @@ const UserSearchCriteria = ({ onSearch, onReset }) => {
                             >
                                 <option value="">Select</option>
                                 <option value="ADMIN">Admin</option>
-                                <option value="CLIENT">Client</option>
+                                <option value="CLIENT">User</option>
                             </select>
                         </div>
 

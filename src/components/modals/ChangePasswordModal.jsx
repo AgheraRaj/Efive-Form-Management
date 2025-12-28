@@ -29,7 +29,7 @@ const ChangePasswordModal = () => {
             newPassword,
             confirmPassword: data.confirmPassword
         }
-        
+
         await changePasswordApi(payload)
 
         closeChangePassword();

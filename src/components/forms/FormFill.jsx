@@ -1,6 +1,7 @@
 import { Printer, Save, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { postFilledForm } from "../../api/form.api";
+import MultiSelectDropdown from "../MultiSelectDropdown";
 
 const ANSWER_TYPE_MAP = {
     NoAnswerRequired: "none",
@@ -13,8 +14,37 @@ const ANSWER_TYPE_MAP = {
     Date: "date",
 };
 
+const VALIDATION_RULES = {
+    ALL: {
+        validate: () => true,
+    },
+    ALPHA: {
+        pattern: {
+            value: /^[A-Za-z\s]+$/,
+            message: "Only alphabetic characters are allowed",
+        },
+    },
+    NUMERIC: {
+        pattern: {
+            value: /^[0-9]+$/,
+            message: "Only numbers are allowed",
+        },
+    },
+    ALPHANUMERIC: {
+        pattern: {
+            value: /^[A-Za-z0-9\s]+$/,
+            message: "Only letters and numbers are allowed",
+        },
+    },
+};
+
 const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
-    const { register, handleSubmit } = useForm();
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm();
 
     if (!selectedForm) return null;
 
@@ -57,7 +87,6 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
 
             <div className="p-3 sm:p-4 bg-[#f3f3f3] space-y-3 text-sm">
 
-                {/* FORM HEADER */}
                 <div className="p-3 bg-[#d4e4ef] rounded-sm shadow-md/30 space-y-2">
                     <p className="font-semibold">
                         <span className="font-bold">Form Title:</span>{" "}
@@ -105,105 +134,179 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
 
                                 {/* RADIO */}
                                 {uiType === "radio" && (
-                                    <div className="grid grid-cols-5">
-                                        {q.answers.map((opt, i) => (
-                                            <label
-                                                key={i}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    value={opt}
-                                                    {...register(
-                                                        `answers.${q.id}`,
-                                                        {
-                                                            required:
-                                                                q.required,
-                                                        }
-                                                    )}
-                                                />
-                                                {opt}
-                                            </label>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="grid grid-cols-5">
+                                            {q.answers.map((opt, i) => (
+                                                <label
+                                                    key={i}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        value={opt}
+                                                        {...register(
+                                                            `answers.${q.id}`,
+                                                            {
+                                                                required:
+                                                                    q.required,
+                                                            }
+                                                        )}
+                                                    />
+                                                    {opt}
+                                                </label>
+                                            ))}
+                                        </div>
+                                        {errors.answers?.[q.id] && q.required && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                This question is required
+                                            </p>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* CHECKBOX */}
                                 {uiType === "checkbox" && (
-                                    <div className="grid grid-cols-5">
-                                        {q.answers.map((opt, i) => (
-                                            <label
-                                                key={i}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    value={opt}
-                                                    {...register(
-                                                        `answers.${q.id}`
-                                                    )}
-                                                />
-                                                {opt}
-                                            </label>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="grid grid-cols-5">
+                                            {q.answers.map((opt, i) => (
+                                                <label
+                                                    key={i}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        value={opt}
+                                                        {...register(
+                                                            `answers.${q.id}`
+                                                        )}
+                                                    />
+                                                    {opt}
+                                                </label>
+                                            ))}
+                                        </div>
+                                        {errors.answers?.[q.id] && q.required && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                This question is required
+                                            </p>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* TEXT */}
                                 {uiType === "text" && (
-                                    <input
-                                        type="text"
-                                        {...register(`answers.${q.id}`, {
-                                            required: q.required,
-                                        })}
-                                        className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
-                                    />
+                                    <>
+                                        <input
+                                            type="text"
+                                            {...register(`answers.${q.id}`, {
+                                                required: q.required,
+                                                ...(q.validationType
+                                                    ? VALIDATION_RULES[q.validationType]
+                                                    : {}),
+                                            })}
+                                            className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
+                                        />
+
+                                        {errors.answers?.[q.id] && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                {errors.answers[q.id].message || "This question is required"}
+                                            </p>
+                                        )}
+                                    </>
                                 )}
+
 
                                 {/* TEXTAREA */}
                                 {uiType === "textarea" && (
-                                    <textarea
-                                        rows={3}
-                                        {...register(`answers.${q.id}`, {
-                                            required: q.required,
-                                        })}
-                                        className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
-                                    />
+                                    <>
+                                        <textarea
+                                            rows={3}
+                                            {...register(`answers.${q.id}`, {
+                                                required: q.required,
+                                                ...(q.validationType
+                                                    ? VALIDATION_RULES[q.validationType]
+                                                    : {}),
+                                            })}
+                                            className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
+                                        />
+
+                                        {errors.answers?.[q.id] && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                {errors.answers[q.id].message || "This question is required"}
+                                            </p>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* SELECT */}
                                 {uiType === "select" && (
-                                    <select
-                                        {...register(`answers.${q.id}`, {
-                                            required: q.required,
-                                        })}
-                                        className="w-full sm:w-1/2 lg:w-1/3 border border-gray-300 rounded px-2 py-1"
-                                    >
-                                        <option value="">Select</option>
-                                        {q.answers.map((opt, i) => (
-                                            <option key={i} value={opt}>
-                                                {opt}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <>
+                                        <select
+                                            {...register(`answers.${q.id}`, {
+                                                required: q.required,
+                                            })}
+                                            className="w-full sm:w-1/2 lg:w-1/3 border border-gray-300 rounded px-2 py-1"
+                                        >
+                                            <option value="">Select</option>
+                                            {q.answers.map((opt, i) => (
+                                                <option key={i} value={opt}>
+                                                    {opt}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.answers?.[q.id] && q.required && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                This question is required
+                                            </p>
+                                        )}
+                                    </>
+                                )}
+
+                                {/* MULTI SELECT DROPDOWN */}
+                                {uiType === "multiselect" && (
+                                    <>
+                                        <Controller
+                                            name={`answers.${q.id}`}
+                                            control={control}
+                                            defaultValue={[]}
+                                            rules={{ required: q.required }}
+                                            render={({ field }) => (
+                                                <MultiSelectDropdown
+                                                    options={q.answers}
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            )}
+                                        />
+                                        {errors.answers?.[q.id] && q.required && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                This question is required
+                                            </p>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* DATE */}
                                 {uiType === "date" && (
-                                    <input
-                                        type="date"
-                                        {...register(`answers.${q.id}`, {
-                                            required: q.required,
-                                        })}
-                                        className="w-full sm:w-1/3 lg:w-1/5 border border-gray-300 rounded px-2 py-1"
-                                    />
+                                    <>
+                                        <input
+                                            type="date"
+                                            {...register(`answers.${q.id}`, {
+                                                required: q.required,
+                                            })}
+                                            className="w-full sm:w-1/3 lg:w-1/5 border border-gray-300 rounded px-2 py-1"
+                                        />
+                                        {errors.answers?.[q.id] && q.required && (
+                                            <p className="text-red-600 text-xs mt-1">
+                                                This question is required
+                                            </p>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
                     );
                 })}
 
-                {/* FOOTER */}
                 <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4">
                     <button
                         type="submit"

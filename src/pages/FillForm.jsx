@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 
@@ -56,6 +55,7 @@ const FillForm = () => {
       <FillFormSearchCriteria
         formTitle={formTitle}
         onSearch={handleSearch}
+        onClose={onClose}
       />
 
       {selectedForm && <FormFill selectedForm={selectedForm} onSubmitted={handleFormSubmitted} onClose={onClose} />}

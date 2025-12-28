@@ -133,6 +133,7 @@ const User = () => {
                     onBack={() => {
                         setEditingUser(null);
                         setView("table");
+                        fetchUsers();
                     }}
                 />
             )}

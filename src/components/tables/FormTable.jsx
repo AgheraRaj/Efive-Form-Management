@@ -8,6 +8,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
 
     const [isOpen, setIsOpen] = useState(false)
     const [selectedForm, setSelectedForm] = useState(null);
+
     const [sortConfig, setSortConfig] = useState({
         key: null,
         direction: null, // "asc" | "desc"
@@ -15,15 +16,26 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
 
     const [searchValue, setSearchValue] = useState("");
 
-    const sortedForms = [...data].sort((a, b) => {
-        if (!sortConfig.key) return 0;
+    const sortedForms = !sortConfig.key
+    ? data
+    : [...data].sort((a, b) => {
+        let valueA = a[sortConfig.key];
+        let valueB = b[sortConfig.key];
 
-        const valueA = a[sortConfig.key].toString().toLowerCase();
-        const valueB = b[sortConfig.key].toString().toLowerCase();
+        if (typeof valueA === "boolean") {
+            valueA = valueA ? 1 : 0;
+            valueB = valueB ? 1 : 0;
+        }
 
-        if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
+        if (typeof valueA === "number") {
+            return sortConfig.direction === "asc"
+                ? valueA - valueB
+                : valueB - valueA;
+        }
+
+        return sortConfig.direction === "asc"
+            ? valueA.toString().localeCompare(valueB.toString())
+            : valueB.toString().localeCompare(valueA.toString());
     });
 
     const searchForm = async (formId) => {
@@ -44,10 +56,6 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
         setIsOpen(false)
     }
 
-    const handleSort = (key, direction) => {
-        setSortConfig({ key, direction });
-    };
-
     const startEntry = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
     const endEntry = Math.min(currentPage * pageSize, totalRecords);
 
@@ -57,7 +65,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
             <div className="flex items-center justify-between px-4 py-2 border-b border-b-gray-300">
                 <h2>Form</h2>
 
-                <button onClick={onAddForm} className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                <button type="button" onClick={onAddForm} className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                     <Plus size={18} />
                     Add Form
                 </button>
@@ -66,6 +74,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
             <div className="flex items-center justify-between px-4 py-3 text-sm">
                 <div className="flex items-center gap-2">
                     <button
+                        type="button"
                         disabled={currentPage === 1}
                         onClick={() => onPageChange(currentPage - 1)}
                         className="disabled:text-gray-300"
@@ -78,6 +87,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                     </div>
 
                     <button
+                        type="button"
                         disabled={currentPage === totalPages}
                         onClick={() => onPageChange(currentPage + 1)}
                         className="disabled:text-gray-300"
@@ -121,8 +131,8 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                                 <div className="flex items-center justify-between">
                                     Form #
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => setSortConfig({ key: "id", direction: "asc" })}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => setSortConfig({ key: "id", direction: "desc" })}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -131,8 +141,8 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                                 <div className="flex items-center justify-between">
                                     Form Title
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => setSortConfig({ key: "formTitle", direction: "asc" })}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => setSortConfig({ key: "formTitle", direction: "desc" })}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -141,8 +151,8 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                                 <div className="flex items-center justify-between">
                                     Active
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => setSortConfig({ key: "isActive", direction: "asc" })}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => setSortConfig({ key: "isActive", direction: "desc" })}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -183,6 +193,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                                     <td className="px-4 py-2 border-b border-l border-gray-300">
                                         <div className="flex items-center justify-center gap-3">
                                             <button
+                                                type="button"
                                                 title="Edit"
                                                 onClick={() => onEditForm(form)}
                                                 className="text-green-600 hover:text-green-800"
@@ -191,6 +202,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                                             </button>
 
                                             <button
+                                                type="button"
                                                 title="View"
                                                 onClick={() => searchForm(form.id)}
                                                 className="text-blue-500 hover:text-blue-700"
@@ -199,13 +211,13 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                                             </button>
 
                                             <button
+                                                type="button"
                                                 title="Delete"
                                                 onClick={() => onDeleteForm(form.id)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
-
                                         </div>
                                     </td>
                                 </tr>

@@ -2,21 +2,43 @@ import { Plus, Pencil, Trash2, ChevronsRight, ChevronsLeft, ChevronDown, Chevron
 import { useState } from "react";
 
 const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, totalPages, totalRecords, pageSize, onPageChange, onSearch }) => {
+    
     const [sortConfig, setSortConfig] = useState({
         key: null,
         direction: null, // "asc" | "desc"
     });
 
-    const sortedUsers = [...data].sort((a, b) => {
-        if (!sortConfig.key) return 0;
+    const sortedUsers = !sortConfig.key
+        ? data
+        : [...data].sort((a, b) => {
+            let valueA = a[sortConfig.key];
+            let valueB = b[sortConfig.key];
 
-        const valueA = a[sortConfig.key].toString().toLowerCase();
-        const valueB = b[sortConfig.key].toString().toLowerCase();
+            if (typeof valueA === "boolean") {
+                valueA = valueA ? 1 : 0;
+                valueB = valueB ? 1 : 0;
+            }
 
-        if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-    });
+            if (typeof valueA === "number") {
+                return sortConfig.direction === "asc"
+                    ? valueA - valueB
+                    : valueB - valueA;
+            }
+
+            if (
+                sortConfig.key === "validFrom" ||
+                sortConfig.key === "validTo"
+            ) {
+                return sortConfig.direction === "asc"
+                    ? new Date(valueA) - new Date(valueB)
+                    : new Date(valueB) - new Date(valueA);
+            }
+
+            return sortConfig.direction === "asc"
+                ? String(valueA).localeCompare(String(valueB))
+                : String(valueB).localeCompare(String(valueA));
+        });
+
 
     const handleSort = (key, direction) => {
         setSortConfig({ key, direction });
@@ -85,8 +107,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     User Name
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("username", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("username", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -95,8 +117,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Email Id
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("email", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("email", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -105,8 +127,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Contact No.
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("contactNo", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("contactNo", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -115,8 +137,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Valid Form
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("validFrom", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("validFrom", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -125,8 +147,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Valid To
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("validTo", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("validTo", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -135,8 +157,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Gender
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("gender", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("gender", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -145,8 +167,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Role
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("role", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("role", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -155,8 +177,8 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                 <div className="flex items-center justify-between">
                                     Active
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("active", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("active", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -195,7 +217,7 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                     <td className="px-4 py-2 border-y border-gray-300">{user.validFrom}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{user.validTo}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{user.gender}</td>
-                                    <td className="px-4 py-2 border-y border-gray-300">{user.role}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{user.role === "ADMIN" ? "Admin" : "User"}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{user.active ? "Yes" : "No"}</td>
 
                                     <td className="px-4 py-2 border-b border-l border-gray-300">

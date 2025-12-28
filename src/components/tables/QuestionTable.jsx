@@ -1,87 +1,84 @@
 import { Pencil, Trash2, ChevronsRight, ChevronsLeft, ChevronDown, ChevronUp, Plus, ChevronsUpDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import QuestionModal from "../modals/QuestionModal";
 import AddEditQuestionModal from "../modals/AddEditQuestionModal";
-import { deleteQuestion, getQuestion } from "../../api/form.api";
-import Loader from "../Loader";
+import { deleteQuestion } from "../../api/form.api";
 
-const QuestionTable = () => {
+const QuestionTable = ({ questions, setQuestions, isEditMode }) => {
 
-    const [openQuestionModal, setOpenQuestionModal] = useState(false);
     const [openAddEdit, setOpenAddEdit] = useState(false);
-
-    const [question, setQuestion] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [selectedQuestion, setSelectedQuestion] = useState(null);
+    const [openQuestionModal, setOpenQuestionModal] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
     const dataInTable = 5;
 
-    const [selectedQuestion, setSelectedQuestion] = useState(null);
-
     const [searchText, setSearchText] = useState("");
-
     const [sortConfig, setSortConfig] = useState({
         key: null,
-        direction: null, // "asc" | "desc"
+        direction: null,
     });
 
-    const filteredQuestions = question.filter((q) =>
+    const filteredQuestions = questions.filter((q) =>
         q.questionName?.toLowerCase().includes(searchText.toLowerCase()) ||
         q.answerType?.toLowerCase().includes(searchText.toLowerCase())
     );
 
     const totalPages = Math.ceil(filteredQuestions.length / dataInTable);
 
-    const fetchQuestion = async () => {
-        try {
-            const res = await getQuestion();
-            setQuestion(res.data);
-        } catch (error) {
-            console.error("Error fetching forms:", error);
-        } finally {
-            setLoading(false);
+    const saveQuestion = (question) => {
+        setQuestions(prev => {
+            const exists = prev.find(q =>
+                q.id ? q.id === question.id : q.tempId === question.tempId
+            );
+            return exists
+                ? prev.map(q =>
+                    q.id === question.id || q.tempId === question.tempId
+                        ? question
+                        : q
+                )
+                : [...prev, question];
+        });
+    };
+
+    const handleDelete = async (question) => {
+        const confirm = window.confirm("Delete this question?");
+        if (!confirm) return;
+
+        // DB delete
+        if (isEditMode && question.id) {
+            await deleteQuestion(question.id);
+            setQuestions(prev => prev.filter(q => q.id !== question.id));
+        }
+        // Local delete
+        else {
+            setQuestions(prev => prev.filter(q => q.tempId !== question.tempId));
         }
     };
 
-    const handleDelete = async (id) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this question?"
-        );
-        if (!confirmDelete) return;
+    const sortedQuestions = !sortConfig.key
+    ? filteredQuestions
+    : [...filteredQuestions].sort((a, b) => {
+        let valueA = a[sortConfig.key];
+        let valueB = b[sortConfig.key];
 
-        try {
-            await deleteQuestion(id);
-            fetchQuestion();
-        } catch (error) {
-            console.error("Delete failed", error);
+        if (typeof valueA === "boolean") {
+            valueA = valueA ? 1 : 0;
+            valueB = valueB ? 1 : 0;
         }
-    };
 
-    const handleEdit = (question) => {
-        setSelectedQuestion(question);
-        setOpenAddEdit(true);
-    };
+        if (typeof valueA === "number") {
+            return sortConfig.direction === "asc"
+                ? valueA - valueB
+                : valueB - valueA;
+        }
 
-
-    useEffect(() => {
-        fetchQuestion();
-    }, []);
-
-    if (loading) {
-        return <Loader />
-    }
-
-    const sortedQuestions = [...filteredQuestions].sort((a, b) => {
-        if (!sortConfig.key) return 0;
-
-        const valueA = String(a[sortConfig.key]).toLowerCase();
-        const valueB = String(b[sortConfig.key]).toLowerCase();
-
-        if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
+        return sortConfig.direction === "asc"
+            ? String(valueA).localeCompare(String(valueB))
+            : String(valueB).localeCompare(String(valueA));
     });
+
 
     const lastIndex = currentPage * dataInTable;
     const firstIndex = lastIndex - dataInTable;
@@ -98,6 +95,7 @@ const QuestionTable = () => {
             <div className="flex items-center justify-between pb-3 text-sm">
                 <div className="flex items-center gap-2">
                     <button
+                        type="button"
                         disabled={currentPage === 1}
                         onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                         className="disabled:text-gray-300"
@@ -110,6 +108,7 @@ const QuestionTable = () => {
                     </div>
 
                     <button
+                        type="button"
                         disabled={currentPage === totalPages}
                         onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                         className="disabled:text-gray-300"
@@ -125,7 +124,6 @@ const QuestionTable = () => {
                     </p>
 
                 </div>
-
 
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
@@ -147,7 +145,7 @@ const QuestionTable = () => {
                         <div onClick={() => setOpenQuestionModal(true)} className="bg-[#4169e1] text-white rounded-sm px-2 py-1.5">
                             <ChevronsUpDown size={15} />
                         </div>
-                        <button onClick={() => setOpenAddEdit(true)} className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                        <button type="button" onClick={() => setOpenAddEdit(true)} className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                             <Plus size={15} />
                             Add
                         </button>
@@ -160,15 +158,14 @@ const QuestionTable = () => {
 
                 {openAddEdit && (
                     <AddEditQuestionModal
-                        onClose={() => {
-                            setOpenAddEdit(false);
-                            setSelectedQuestion(null);
-                        }}
-                        onSuccess={fetchQuestion}
                         editData={selectedQuestion}
+                        onClose={() => {
+                            setSelectedQuestion(null);
+                            setOpenAddEdit(false);
+                        }}
+                        onSuccess={saveQuestion}
                     />
                 )}
-
             </div>
 
             {/* Table */}
@@ -180,8 +177,8 @@ const QuestionTable = () => {
                                 <div className="flex items-center justify-between">
                                     Question #
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -190,8 +187,8 @@ const QuestionTable = () => {
                                 <div className="flex items-center justify-between">
                                     Question Name
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("questionName", "asc")}><ChevronUp size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("questionName", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -200,8 +197,8 @@ const QuestionTable = () => {
                                 <div className="flex items-center justify-between">
                                     Answer Type
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("answerType", "asc")}><ChevronUp size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("answerType", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -210,8 +207,8 @@ const QuestionTable = () => {
                                 <div className="flex items-center justify-between">
                                     Required
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("required", "asc")}><ChevronUp size={15} /></button>
+                                        <button type="button" className="cursor-pointer" onClick={() => handleSort("required", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -233,10 +230,10 @@ const QuestionTable = () => {
                                 </td>
                             </tr>
                         ) : (
-                            paginatedQuestions.map((question) => (
-                                <tr key={question.id} className="hover:bg-gray-50">
+                            paginatedQuestions.map((question, index) => (
+                                <tr key={question.id || question.tempId} className="hover:bg-gray-50">
                                     <td className="px-4 py-2 border-y border-gray-300">
-                                        {question.id}
+                                        {index + 1}
                                     </td>
 
                                     <td className="px-4 py-2 border-y border-gray-300">
@@ -254,16 +251,21 @@ const QuestionTable = () => {
                                     <td className="px-4 py-2 border-l border-b border-gray-300">
                                         <div className="flex items-center justify-center gap-3">
                                             <button
+                                                type="button"
                                                 title="Edit"
-                                                onClick={() => handleEdit(question)}
+                                                onClick={() => {
+                                                    setSelectedQuestion(question);
+                                                    setOpenAddEdit(true);
+                                                }}
                                                 className="text-green-600 hover:text-green-800"
                                             >
                                                 <Pencil size={16} />
                                             </button>
 
                                             <button
+                                                type="button"
                                                 title="Delete"
-                                                onClick={() => handleDelete(question.id)}
+                                                onClick={() => handleDelete(question)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 size={16} />

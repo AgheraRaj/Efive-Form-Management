@@ -20,7 +20,7 @@ function Login() {
 
     useEffect(() => {
         document.title = "Login";
-      }, []);
+    }, []);
 
 
     const {
@@ -52,7 +52,6 @@ function Login() {
         }
     };
 
-
     return (
         <div
             className="min-h-screen flex items-center justify-center bg-[#eef6fa]"
@@ -72,15 +71,21 @@ function Login() {
 
                 <div className="mb-2">
                     <input
-                        {...register("username", { required: "Enter the Username" })}
-                        type="text"
-                        placeholder="Your Username"
+                        {...register("email", {
+                            required: "Email is required",
+                            pattern: {
+                                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                message: "Enter a valid email address",
+                            }
+                        })}
+                        type="email"
+                        placeholder="Your Email"
                         className={`w-full px-4 py-1.5 rounded-sm bg-gray-100 border-2 border-transparent focus:border-gray-200 ${errors.userName ? "focus:border-b-red-500" : "focus:border-b-[#4169e1]"} focus:bg-white focus:outline-none transition delay-150 duration-500 ease-in-out`}
                     />
 
-                    {errors.username && (
+                    {errors.email && (
                         <p className="text-red-500 text-sm font-medium mt-1">
-                            {errors.username.message}
+                            {errors.email.message}
                         </p>
                     )}
                 </div>

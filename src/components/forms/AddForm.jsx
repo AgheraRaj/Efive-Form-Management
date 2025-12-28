@@ -4,17 +4,18 @@ import { useForm } from "react-hook-form";
 
 import QuestionTable from "../tables/QuestionTable";
 import { postForm, updateForm } from "../../api/form.api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const AddForm = ({ onBack, onSuccess, editData }) => {
 
     const isEditMode = Boolean(editData);
+    const [questions, setQuestions] = useState([]);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
-        reset,
+        reset
     } = useForm({
         defaultValues: {
             title: "",
@@ -35,20 +36,23 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
         if (!editData) return;
 
         reset({
-            title: editData.formTitle,
-            alias: editData.aliasName,
-            module: editData.module,
-            characteristic: editData.characteristic,
-            subCharacteristic: editData.subCharacteristic,
-            recurrence: editData.recurrence,
-            startMonth: editData.startMonth,
-            compliancePeriod: editData.compliancePeriod,
-            date: editData.effectiveDate?.split("T")[0],
-            isActive: editData.isActive,
-            text: editData.text,
+            title: editData.formTitle || "",
+            alias: editData.aliasName || "",
+            module: editData.module || "",
+            characteristic: editData.characteristic || "",
+            subCharacteristic: editData.subCharacteristic || "",
+            recurrence: editData.recurrence || "",
+            startMonth: editData.startMonth || "",
+            compliancePeriod: editData.compliancePeriod || "",
+            date: editData.effectiveDate
+                ? editData.effectiveDate.split("T")[0]
+                : "",
+            isActive: editData.isActive ?? true,
+            text: editData.text || "",
         });
-    }, [editData, reset]);
 
+        setQuestions(editData.questions || []);
+    }, [editData, reset]);
 
     const onSubmit = async (data) => {
         const payload = {
@@ -63,7 +67,10 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
             subCharacteristic: Number(data.subCharacteristic),
             recurrence: Number(data.recurrence),
             startMonth: Number(data.startMonth),
+            questions
         };
+
+        console.log(payload)
 
         if (isEditMode) {
             await updateForm(editData.id, payload);
@@ -80,7 +87,7 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
             <div className="flex items-center justify-between px-4 py-2 border-b border-b-gray-300">
                 <h2>{isEditMode ? "Edit Form" : "Add Form"}</h2>
 
-                <button onClick={onBack} className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                <button type="button" onClick={onBack} className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                     <RotateCcw size={18} />
                     Move Back
                 </button>
@@ -94,7 +101,11 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                         <label className="block mb-1 text-gray-800 font-medium">Form #</label>
                         <input
                             disabled
-                            value="FORM-01"
+                            value={
+                                isEditMode
+                                    ? `${editData.id}`
+                                    : "FORM-1"
+                            }
                             className="w-full px-3 py-0.5 bg-gray-200 border border-gray-300 rounded"
                         />
                     </div>
@@ -265,7 +276,7 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                         <input
                             {...register("compliancePeriod", { required: "Compliance period is required" })}
                             type="text"
-                            placeholder="In Months"
+                            placeholder="In Months (1-12)"
                             className="w-full px-3 py-0.5 border border-gray-300 rounded"
                         />
                         {errors.compliancePeriod && (
@@ -311,14 +322,18 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                     Form Question
                 </p>
 
-                <QuestionTable />
+                <QuestionTable
+                    isEditMode={isEditMode}
+                    questions={questions}
+                    setQuestions={setQuestions}
+                />
 
                 <div className="flex justify-center items-center gap-2 py-2">
                     <button type="submit" className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                         <Save size={18} />
                         {isEditMode ? "Update" : "Save"}
                     </button>
-                    <button onClick={onBack} className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                    <button type="button" onClick={onBack} className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                         <X size={18} />
                         Cancel
                     </button>

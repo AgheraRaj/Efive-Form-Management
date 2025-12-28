@@ -11,16 +11,29 @@ const CompletedFormTable = ({ data, currentPage, totalPages, totalRecords, pageS
         direction: null, // "asc" | "desc"
     });
 
-    const sortedForms = [...data].sort((a, b) => {
-        if (!sortConfig.key) return 0;
+    const sortedForms = !sortConfig.key
+        ? data
+        : [...data].sort((a, b) => {
+            let valueA = a[sortConfig.key];
+            let valueB = b[sortConfig.key];
 
-        const valueA = a[sortConfig.key].toString().toLowerCase();
-        const valueB = b[sortConfig.key].toString().toLowerCase();
+            if (sortConfig.key === "completedDate") {
+                return sortConfig.direction === "asc"
+                    ? new Date(valueA) - new Date(valueB)
+                    : new Date(valueB) - new Date(valueA);
+            }
 
-        if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
-        if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
-    });
+            if (typeof valueA === "number") {
+                return sortConfig.direction === "asc"
+                    ? valueA - valueB
+                    : valueB - valueA;
+            }
+
+            return sortConfig.direction === "asc"
+                ? String(valueA).localeCompare(String(valueB))
+                : String(valueB).localeCompare(String(valueA));
+        });
+
 
     const handleSort = (key, direction) => {
         setSortConfig({ key, direction });
@@ -92,8 +105,8 @@ const CompletedFormTable = ({ data, currentPage, totalPages, totalRecords, pageS
                                 <div className="flex items-center justify-between">
                                     Completed Date
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("completedDate", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("completedDate", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -102,8 +115,8 @@ const CompletedFormTable = ({ data, currentPage, totalPages, totalRecords, pageS
                                 <div className="flex items-center justify-between">
                                     Form #
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("formId", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("formId", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -112,8 +125,8 @@ const CompletedFormTable = ({ data, currentPage, totalPages, totalRecords, pageS
                                 <div className="flex items-center justify-between">
                                     Form Name
                                     <div className="flex flex-col text-xs">
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "asc")}><ChevronUp size={15} /></button>
-                                        <button className="cursor-pointer" onClick={() => handleSort("id", "desc")}><ChevronDown size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("formTitle", "asc")}><ChevronUp size={15} /></button>
+                                        <button className="cursor-pointer" onClick={() => handleSort("formTitle", "desc")}><ChevronDown size={15} /></button>
                                     </div>
                                 </div>
                             </th>
@@ -150,7 +163,7 @@ const CompletedFormTable = ({ data, currentPage, totalPages, totalRecords, pageS
                                     <td className="px-4 py-2 border-y border-gray-300">{form.completedDate}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{form.formId}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{form.formTitle}</td>
-                                    <td className="px-4 py-2 border-y border-gray-300">{form.active ? "Yes" : "No"}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{form.createdBy}</td>
 
                                     <td className="px-4 py-2 text-center border-b border-l border-gray-300">
                                         <button

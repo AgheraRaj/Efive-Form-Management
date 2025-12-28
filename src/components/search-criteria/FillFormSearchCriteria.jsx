@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus, Minus, RefreshCcw, Search } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-const FillFormSearchCriteria = ({ formTitle, onSearch }) => {
+const FillFormSearchCriteria = ({ formTitle, onSearch, onClose }) => {
   const [open, setOpen] = useState(true);
 
   const {
@@ -24,6 +24,7 @@ const FillFormSearchCriteria = ({ formTitle, onSearch }) => {
   const handleReset = () => {
     reset();
     onSearch(null);
+    onClose()
   };
 
   return (

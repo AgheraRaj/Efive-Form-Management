@@ -17,6 +17,7 @@ const AddUser = ({ onBack, editData }) => {
         register,
         handleSubmit,
         reset,
+        watch,
         formState: { errors, isSubmitting },
     } = useForm({
         defaultValues: {
@@ -55,6 +56,16 @@ const AddUser = ({ onBack, editData }) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        if (!file.type.startsWith("image/")) {
+            alert("Only image files are allowed");
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert("Image size must be less than 2MB");
+            return;
+        }
+
         setImageFile(file);
         setImagePreview(URL.createObjectURL(file));
     };
@@ -65,41 +76,51 @@ const AddUser = ({ onBack, editData }) => {
     };
 
     const onSubmit = async (data) => {
-        const formData = new FormData();
+        try {
+            const formData = new FormData();
 
-        formData.append(
-            "user",
-            new Blob(
-                [JSON.stringify({
-                    firstname: data.firstName,
-                    lastname: data.lastName,
-                    email: data.email,
-                    contactNo: data.contactNo,
-                    gender: data.gender,
-                    validFrom: data.validFrom,
-                    validTo: data.validTo,
-                    role: data.role,
-                })],
-                { type: "application/json" }
-            )
-        );
+            formData.append(
+                "user",
+                new Blob(
+                    [JSON.stringify({
+                        firstname: data.firstName,
+                        lastname: data.lastName,
+                        email: data.email,
+                        contactNo: data.contactNo,
+                        gender: data.gender,
+                        validFrom: data.validFrom,
+                        validTo: data.validTo,
+                        role: data.role,
+                    })],
+                    { type: "application/json" }
+                )
+            );
 
-        if (imageFile) {
-            formData.append("file", imageFile);
+            if (imageFile) {
+                formData.append("file", imageFile);
+            }
+
+            if (isEditMode) {
+                await updateUser(editData.id, formData);
+            } else {
+                await createUser(formData);
+            }
+
+            reset();
+            setImagePreview(null);
+            setImageFile(null);
+            onBack();
+
+        } catch (error) {
+            console.error("User save failed:", error);
+
+            if (error.code === "ECONNABORTED") {
+                alert("Request timed out. Please try again.");
+            } else {
+                alert("Failed to save user.");
+            }
         }
-
-        if (isEditMode) {
-            await updateUser(editData.id, formData);
-        } else {
-            await createUser(formData);
-        }
-
-        reset();
-        setImagePreview(null);
-        setImageFile(null);
-        onBack();
     };
-
 
     return (
         <div className="bg-white border border-gray-300 rounded-md shadow-md my-4 mx-8">
@@ -108,7 +129,6 @@ const AddUser = ({ onBack, editData }) => {
                 <h2 className="font-semibold">
                     {isEditMode ? "Edit User" : "Add Users"}
                 </h2>
-
 
                 <button
                     onClick={onBack}
@@ -165,12 +185,30 @@ const AddUser = ({ onBack, editData }) => {
                     </div>
 
                     <div className="grid grid-cols-12 gap-4">
+
                         <div className="col-span-4">
                             <label className="block mb-1 font-medium">
                                 First Name <span className="text-red-600">*</span>
                             </label>
                             <input
-                                {...register("firstName", { required: "First name is required" })}
+                                {...register("firstName", {
+                                    required: "First name is required",
+                                    pattern: {
+                                        value: /^[A-Za-z\s]+$/,
+                                        message: "Only letters are allowed",
+                                    },
+                                    minLength: {
+                                        value: 2,
+                                        message: "Minimum 2 characters required",
+                                    },
+                                    maxLength: {
+                                        value: 30,
+                                        message: "Maximum 30 characters allowed",
+                                    },
+                                })}
+                                onInput={(e) => {
+                                    e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                                }}
                                 className="w-full px-3 py-1 border border-gray-300 rounded"
                             />
                             {errors.firstName && (
@@ -185,7 +223,24 @@ const AddUser = ({ onBack, editData }) => {
                                 Last Name <span className="text-red-600">*</span>
                             </label>
                             <input
-                                {...register("lastName", { required: "Last name is required" })}
+                                {...register("lastName", {
+                                    required: "Last name is required",
+                                    pattern: {
+                                        value: /^[A-Za-z\s]+$/,
+                                        message: "Only letters are allowed",
+                                    },
+                                    minLength: {
+                                        value: 2,
+                                        message: "Minimum 2 characters required",
+                                    },
+                                    maxLength: {
+                                        value: 30,
+                                        message: "Maximum 30 characters allowed",
+                                    },
+                                })}
+                                onInput={(e) => {
+                                    e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                                }}
                                 className="w-full px-3 py-1 border border-gray-300 rounded"
                             />
                             {errors.lastName && (
@@ -196,6 +251,7 @@ const AddUser = ({ onBack, editData }) => {
                         </div>
                     </div>
 
+
                     <div className="grid grid-cols-12 gap-4">
                         <div className="col-span-5">
                             <label className="block mb-1 font-medium">
@@ -203,15 +259,18 @@ const AddUser = ({ onBack, editData }) => {
                             </label>
                             <input
                                 type="email"
+                                disabled={isEditMode}
                                 {...register("email", {
                                     required: "Email is required",
                                     pattern: {
-                                        value: /^\S+@\S+$/i,
-                                        message: "Invalid email",
+                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                        message: "Enter a valid email address",
                                     },
                                 })}
-                                className="w-full px-3 py-1 border border-gray-300 rounded"
+                                className={`w-full px-3 py-1 border border-gray-300 rounded 
+      ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
                             />
+
                             {errors.email && (
                                 <p className="text-red-600 text-xs mt-1">
                                     {errors.email.message}
@@ -227,9 +286,18 @@ const AddUser = ({ onBack, editData }) => {
                                 type="tel"
                                 {...register("contactNo", {
                                     required: "Contact number is required",
+                                    pattern: {
+                                        value: /^[0-9]{10}$/,
+                                        message: "Contact number must be 10 digits",
+                                    },
                                 })}
+                                onInput={(e) => {
+                                    e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                                }}
+                                maxLength={10}
                                 className="w-full px-3 py-1 border border-gray-300 rounded"
                             />
+
                             {errors.contactNo && (
                                 <p className="text-red-600 text-xs mt-1">
                                     {errors.contactNo.message}
@@ -271,9 +339,24 @@ const AddUser = ({ onBack, editData }) => {
                             <label className="block mb-1 font-medium">Valid To</label>
                             <input
                                 type="date"
-                                {...register("validTo")}
+                                {...register("validTo", {
+                                    validate: (value) => {
+                                        const validFrom = watch("validFrom");
+                                        if (validFrom && value && value < validFrom) {
+                                            return "Valid To date cannot be before Valid From";
+                                        }
+                                        return true;
+                                    },
+                                })}
                                 className="w-full px-3 py-1 border border-gray-300 rounded"
                             />
+
+                            {errors.validTo && (
+                                <p className="text-red-600 text-xs mt-1">
+                                    {errors.validTo.message}
+                                </p>
+                            )}
+
                         </div>
 
                         <div className="col-span-3">
@@ -302,10 +385,11 @@ const AddUser = ({ onBack, editData }) => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 bg-[#4169e1] text-white px-3 py-1 rounded-sm"
+                            className={`flex items-center gap-2 px-3 py-1 rounded-sm text-white 
+      ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#4169e1]"}`}
                         >
                             <Save size={18} />
-                            {isEditMode ? "Update" : "Save"}
+                            {isSubmitting ? "Saving..." : isEditMode ? "Update" : "Save"}
                         </button>
 
                         <button
