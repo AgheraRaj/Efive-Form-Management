@@ -71,6 +71,8 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
             questions,
         };
 
+        console.log("post form", payload)
+
         try {
             let res;
 
@@ -354,7 +356,6 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                 </p>
 
                 <QuestionTable
-                    isEditMode={isEditMode}
                     questions={questions}
                     setQuestions={setQuestions}
                 />

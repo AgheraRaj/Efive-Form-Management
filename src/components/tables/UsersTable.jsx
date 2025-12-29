@@ -218,7 +218,7 @@ const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, to
                                     <td className="px-4 py-2 border-y border-gray-300">{user.validTo}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{user.gender}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">{user.role === "ADMIN" ? "Admin" : "User"}</td>
-                                    <td className="px-4 py-2 border-y border-gray-300">{user.active ? "Yes" : "No"}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{user.isActive ? "Yes" : "No"}</td>
 
                                     <td className="px-4 py-2 border-b border-l border-gray-300">
                                         <div className="flex items-center justify-center gap-3">

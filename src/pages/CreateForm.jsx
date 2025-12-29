@@ -27,7 +27,7 @@ const CreateForm = () => {
   const fetchForms = async () => {
     try {
       const res = await getForm();
-      console.log(res)
+      console.log("get form",res)
       setFormData(res.data.data);
     } catch (error) {
       console.error("Error fetching forms:", error);

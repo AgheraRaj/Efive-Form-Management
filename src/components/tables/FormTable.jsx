@@ -42,8 +42,7 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
         if (!formId) return;
 
         const res = await getFormById(formId);
-        setSelectedForm(res.data);
-        console.log(res.data);
+        setSelectedForm(res.data.data);
         setIsOpen(true)
     }
 

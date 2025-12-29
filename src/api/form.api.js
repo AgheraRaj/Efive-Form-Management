@@ -50,7 +50,7 @@ export const deleteForm = (formId) => {
 
 export const deleteQuestion = (id) => {
   return api.delete(`/question/deleteQuestion/${id}`);
-}; //yes
+}; 
 
 export const updateQuestion = (id, payload) => {
   return api.put(`/question/editQuestion/${id}`, payload);

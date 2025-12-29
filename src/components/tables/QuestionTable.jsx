@@ -5,9 +5,8 @@ import toast from "react-hot-toast";
 
 import QuestionModal from "../modals/QuestionModal";
 import AddEditQuestionModal from "../modals/AddEditQuestionModal";
-import { deleteQuestion } from "../../api/form.api";
 
-const QuestionTable = ({ questions, setQuestions, isEditMode }) => {
+const QuestionTable = ({ questions, setQuestions }) => {
 
     const [openAddEdit, setOpenAddEdit] = useState(false);
     const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -30,16 +29,16 @@ const QuestionTable = ({ questions, setQuestions, isEditMode }) => {
     const totalPages = Math.ceil(filteredQuestions.length / dataInTable);
 
     useEffect(() => {
-    const totalPages = Math.ceil(filteredQuestions.length / dataInTable);
+        const totalPages = Math.ceil(filteredQuestions.length / dataInTable);
 
-    if (currentPage > totalPages && totalPages > 0) {
-        setCurrentPage(totalPages);
-    }
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+        }
 
-    if (totalPages === 0) {
-        setCurrentPage(1);
-    }
-}, [filteredQuestions.length, currentPage]);
+        if (totalPages === 0) {
+            setCurrentPage(1);
+        }
+    }, [filteredQuestions.length, currentPage]);
 
 
     const saveQuestion = (question) => {
@@ -57,36 +56,19 @@ const QuestionTable = ({ questions, setQuestions, isEditMode }) => {
         });
     };
 
-    const handleDelete = async (question) => {
+    const handleDelete = (question) => {
         const confirmDelete = window.confirm("Delete this question?");
         if (!confirmDelete) return;
 
-        try {
+        setQuestions((prev) =>
+            prev.filter((q) =>
+                question.id
+                    ? q.id !== question.id
+                    : q.tempId !== question.tempId
+            )
+        );
 
-            if (isEditMode && question.id) {
-                const res = await deleteQuestion(question.id);
-
-                setQuestions((prev) =>
-                    prev.filter((q) => q.id !== question.id)
-                );
-
-                toast.success(
-                    res?.data?.message || "Question deleted successfully"
-                );
-            }
-
-            else {
-                setQuestions((prev) =>
-                    prev.filter((q) => q.tempId !== question.tempId)
-                );
-
-                toast.success("Question removed successfully");
-            }
-        } catch (error) {
-            toast.error(
-                error?.response?.data?.message || "Failed to delete question"
-            );
-        }
+        toast.success("Question deleted successfully");
     };
 
 
