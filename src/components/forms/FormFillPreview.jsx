@@ -3,6 +3,7 @@ import { Controller, useForm } from "react-hook-form";
 import { postFilledForm } from "../../api/form.api";
 import { Printer, Save, X } from "lucide-react";
 import MultiSelectDropdown from "../MultiSelectDropdown";
+import toast from "react-hot-toast";
 
 
 const ANSWER_TYPE_MAP = {
@@ -53,25 +54,36 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
     };
 
     const onSubmit = async (data) => {
-        const answeredQuestions = selectedForm.questions.map((q) => {
-            const rawAnswer = data.answers?.[q.id];
+  try {
+    const answeredQuestions = selectedForm.questions.map((q) => {
+      const rawAnswer = data.answers?.[q.id];
 
-            return {
-                questionId: q.id,
-                questionName: q.questionName,
-                description: q.description ?? null,
-                answers: normalizeToArray(rawAnswer),
-            };
-        });
+      return {
+        questionId: q.id,
+        questionName: q.questionName,
+        description: q.description ?? null,
+        answers: normalizeToArray(rawAnswer),
+      };
+    });
 
-        const payload = {
-            formId: selectedForm.formId,
-            answeredQuestions,
-        };
-
-        await postFilledForm(payload);
-        onSubmitted?.();
+    const payload = {
+      formId: selectedForm.formId,
+      answeredQuestions,
     };
+
+    const res = await postFilledForm(payload);
+
+    toast.success(
+      res?.data?.message || "Form submitted successfully"
+    );
+
+    onSubmitted?.();
+  } catch (error) {
+    toast.error(
+      error?.response?.data?.message || "Failed to submit form"
+    );
+  }
+};
 
     return (
         <>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import FormTable from "../components/tables/FormTable";
 import AddForm from "../components/forms/AddForm";
@@ -27,7 +28,7 @@ const CreateForm = () => {
     try {
       const res = await getForm();
       console.log(res)
-      setFormData(res.data);
+      setFormData(res.data.data);
     } catch (error) {
       console.error("Error fetching forms:", error);
     } finally {
@@ -51,10 +52,23 @@ const CreateForm = () => {
     try {
       setLoading(true);
 
-      await deleteForm(formId);
+      const res = await deleteForm(formId);
 
+      toast.success(
+        res?.data?.message || "Form deleted successfully"
+      );
+
+      const newTotalRecords = filteredForms.length - 1;
+      const newTotalPages = Math.ceil(newTotalRecords / dataInTable);
+
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+      }
       fetchForms()
     } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to delete form"
+      );
       console.error("Error deleting form:", error);
     } finally {
       setLoading(false);

@@ -35,10 +35,11 @@ function Login() {
             setLoginError("");
             const res = await loginApi(data);
 
-            login(res.data.token);
+            login(res.data.data.token);
+            console.log(res)
 
             navigate(
-                jwtDecode(res.data.token).role === "ADMIN"
+                jwtDecode(res.data.data.token).role === "ADMIN"
                     ? "/admin/create-form"
                     : "/user/fill-form",
                 { replace: true }

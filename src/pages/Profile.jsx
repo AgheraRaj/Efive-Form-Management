@@ -5,19 +5,20 @@ import SettingTable from "../components/tables/SettingTable";
 import UserDetails from "../components/UserDetails";
 import { getProfile, updateProfileImage } from "../api/user.api";
 import Loader from "../components/Loader";
+import toast from "react-hot-toast";
 
 const Profile = () => {
     const fileInputRef = useRef(null);
 
     const [uploading, setUploading] = useState(false);
     const [activeTab, setActiveTab] = useState("details");
-    const [profile, setProfile] = useState({}); 
+    const [profile, setProfile] = useState({});
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async () => {
         try {
             const res = await getProfile();
-            setProfile(res.data);
+            setProfile(res.data.data);
         } catch (error) {
             console.error("Error fetching profile:", error);
         } finally {
@@ -29,26 +30,36 @@ const Profile = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // instend preview
-        // const previewUrl = URL.createObjectURL(file);
-        // setProfile(prev => ({
-        //     ...prev,
-        //     profilePicture: previewUrl
-        // }));
-
         const formData = new FormData();
         formData.append("file", file);
 
         try {
             setUploading(true);
+
             const res = await updateProfileImage(formData);
-            setProfile(res.data); 
+
+            setProfile(prev => ({
+                ...prev,
+                ...res.data.data,
+            }));
+
+            toast.success(
+                res?.data?.message || "Profile image updated successfully"
+            );
         } catch (error) {
             console.error("Image upload failed", error);
+            toast.error(
+                error?.response?.data?.message || "Image upload failed"
+            );
         } finally {
             setUploading(false);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
+
 
     useEffect(() => {
         document.title = "Profile";
@@ -74,7 +85,6 @@ const Profile = () => {
                         className="h-38 w-38 rounded-sm border-2 border-white shadow"
                     />
 
-                    {/* hidden file input */}
                     <input
                         type="file"
                         accept="image/*"
@@ -112,10 +122,12 @@ const Profile = () => {
                         <p>{profile.email}</p>
                     </div>
 
-                    <div className="border-b border-gray-300 pb-4">
-                        <p className="font-medium">Contact No:</p>
-                        <p>{profile.contactNo}</p>
-                    </div>
+                    {profile.contactNo && (
+                        <div className="border-b border-gray-300 pb-4">
+                            <p className="font-medium">Contact No:</p>
+                            <p>{profile.contactNo}</p>
+                        </div>
+                    )}
                 </div>
             </div>
 

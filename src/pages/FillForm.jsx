@@ -15,7 +15,7 @@ const FillForm = () => {
   const fetchFormTitles = async () => {
     try {
       const res = await getOption();
-      setFormTitle(res.data);
+      setFormTitle(res.data.data);
     } catch (error) {
       console.error("Error fetching options:", error);
     } finally {
@@ -33,7 +33,7 @@ const FillForm = () => {
     if (!formId) return;
 
     const res = await getFormById(formId);
-    setSelectedForm(res.data);
+    setSelectedForm(res.data.data);
     console.log(selectedForm);
   };
 

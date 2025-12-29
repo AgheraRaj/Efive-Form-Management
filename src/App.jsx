@@ -10,6 +10,7 @@ import CompletedForm from "./pages/CompletedForm";
 import User from "./pages/User";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -38,6 +39,17 @@ function App() {
           </Route>
         </Route>
       </Routes>
+      
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 3000,
+          style: {
+            fontSize: "14px",
+          },
+        }}
+      />
     </ModalProvider>
   );
 }

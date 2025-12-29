@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 
 import { useModal } from "../../hooks/ModalContext";
 import { changePasswordApi } from "../../api/user.api";
+import toast from "react-hot-toast";
 
 const ChangePasswordModal = () => {
     const { closeChangePassword } = useModal();
@@ -27,12 +28,22 @@ const ChangePasswordModal = () => {
         const payload = {
             oldPassword: data.currentPassword,
             newPassword,
-            confirmPassword: data.confirmPassword
+            confirmPassword: data.confirmPassword,
+        };
+
+        try {
+            const res = await changePasswordApi(payload);
+
+            toast.success(
+                res?.data?.message || "Password changed successfully"
+            );
+
+            closeChangePassword();
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to change password"
+            );
         }
-
-        await changePasswordApi(payload)
-
-        closeChangePassword();
     };
 
     return (

@@ -1,5 +1,7 @@
 import { Pencil, Trash2, ChevronsRight, ChevronsLeft, ChevronDown, ChevronUp, Plus, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
 
 import QuestionModal from "../modals/QuestionModal";
 import AddEditQuestionModal from "../modals/AddEditQuestionModal";
@@ -27,6 +29,19 @@ const QuestionTable = ({ questions, setQuestions, isEditMode }) => {
 
     const totalPages = Math.ceil(filteredQuestions.length / dataInTable);
 
+    useEffect(() => {
+    const totalPages = Math.ceil(filteredQuestions.length / dataInTable);
+
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    }
+
+    if (totalPages === 0) {
+        setCurrentPage(1);
+    }
+}, [filteredQuestions.length, currentPage]);
+
+
     const saveQuestion = (question) => {
         setQuestions(prev => {
             const exists = prev.find(q =>
@@ -43,41 +58,59 @@ const QuestionTable = ({ questions, setQuestions, isEditMode }) => {
     };
 
     const handleDelete = async (question) => {
-        const confirm = window.confirm("Delete this question?");
-        if (!confirm) return;
+        const confirmDelete = window.confirm("Delete this question?");
+        if (!confirmDelete) return;
 
-        // DB delete
-        if (isEditMode && question.id) {
-            await deleteQuestion(question.id);
-            setQuestions(prev => prev.filter(q => q.id !== question.id));
-        }
-        // Local delete
-        else {
-            setQuestions(prev => prev.filter(q => q.tempId !== question.tempId));
+        try {
+
+            if (isEditMode && question.id) {
+                const res = await deleteQuestion(question.id);
+
+                setQuestions((prev) =>
+                    prev.filter((q) => q.id !== question.id)
+                );
+
+                toast.success(
+                    res?.data?.message || "Question deleted successfully"
+                );
+            }
+
+            else {
+                setQuestions((prev) =>
+                    prev.filter((q) => q.tempId !== question.tempId)
+                );
+
+                toast.success("Question removed successfully");
+            }
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to delete question"
+            );
         }
     };
 
+
     const sortedQuestions = !sortConfig.key
-    ? filteredQuestions
-    : [...filteredQuestions].sort((a, b) => {
-        let valueA = a[sortConfig.key];
-        let valueB = b[sortConfig.key];
+        ? filteredQuestions
+        : [...filteredQuestions].sort((a, b) => {
+            let valueA = a[sortConfig.key];
+            let valueB = b[sortConfig.key];
 
-        if (typeof valueA === "boolean") {
-            valueA = valueA ? 1 : 0;
-            valueB = valueB ? 1 : 0;
-        }
+            if (typeof valueA === "boolean") {
+                valueA = valueA ? 1 : 0;
+                valueB = valueB ? 1 : 0;
+            }
 
-        if (typeof valueA === "number") {
+            if (typeof valueA === "number") {
+                return sortConfig.direction === "asc"
+                    ? valueA - valueB
+                    : valueB - valueA;
+            }
+
             return sortConfig.direction === "asc"
-                ? valueA - valueB
-                : valueB - valueA;
-        }
-
-        return sortConfig.direction === "asc"
-            ? String(valueA).localeCompare(String(valueB))
-            : String(valueB).localeCompare(String(valueA));
-    });
+                ? String(valueA).localeCompare(String(valueB))
+                : String(valueB).localeCompare(String(valueA));
+        });
 
 
     const lastIndex = currentPage * dataInTable;

@@ -5,7 +5,8 @@ import UsersTable from "../components/tables/UsersTable"
 import UserSearchCriteria from "../components/search-criteria/UserSearchCriteria"
 import AddUser from "../components/forms/AddUser"
 import Loader from "../components/Loader";
-import { deleteUser, getFilterUsers, getUser } from "../api/user.api";
+import { deleteUser, getUser } from "../api/user.api";
+import toast from "react-hot-toast";
 
 const User = () => {
     const [view, setView] = useState("table");
@@ -26,34 +27,25 @@ const User = () => {
         user.role?.toLowerCase().includes(searchText.toLowerCase())
     );
 
-    const fetchUsers = async () => {
+    const fetchUsers = async (criteria = {}) => {
         setLoading(true);
         try {
-            const res = await getUser();
-            setUserData(res.data);
+            const res = await getUser(criteria);
+            setUserData(res.data.data);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         document.title = "Users";
         fetchUsers();
     }, []);
 
-    const fetchFilterUsers = async (criteria = {}) => {
-        setLoading(true);
-        try {
-            const res = await getFilterUsers(criteria);
-            setUserData(res.data);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+
 
     const handleEditUser = (user) => {
         setEditingUser(user);
@@ -63,16 +55,29 @@ const User = () => {
     const handleDeleteUser = async (userId) => {
         if (!userId) return;
 
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this user?"
-        );
-        if (!confirmDelete) return;
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
 
         try {
             setLoading(true);
-            await deleteUser(userId);
-            fetchUsers()
+
+            const res = await deleteUser(userId);
+
+            toast.success(
+                res?.data?.message || "User deleted successfully"
+            );
+
+            const newTotalRecords = filteredUsers.length - 1;
+            const newTotalPages = Math.ceil(newTotalRecords / dataInTable);
+
+            if (currentPage > newTotalPages) {
+                setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+            }
+
+            fetchUsers();
         } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to delete user"
+            );
             console.error("Error deleting user:", error);
         } finally {
             setLoading(false);
@@ -80,7 +85,7 @@ const User = () => {
     };
 
     const handleSearch = (criteria) => {
-        fetchFilterUsers(criteria);
+        fetchUsers(criteria);
     };
 
     const handleReset = () => {

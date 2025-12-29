@@ -1,6 +1,6 @@
 import { X, Save, Plus, Minus } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 
 const ANSWER_TYPES = {
@@ -39,6 +39,8 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
 
   const validateEnabled = watch("validateFormat");
 
+  const isEditInitializing = useRef(false);
+
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "options",
@@ -60,6 +62,8 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
       return;
     }
 
+    isEditInitializing.current = true;
+
     reset({
       label: editData.lable ?? "",
       name: editData.questionName ?? "",
@@ -70,11 +74,16 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
           ? editData.answers.map(a => ({ value: a }))
           : [{ value: "" }],
       required: !!editData.required,
-      validateFormat: !!editData.validationType,
+      validateFormat: !!editData.validateFormat,
       validationType: editData.validationType || "",
       dateFormat: editData.dateFormat || "",
     });
+
+    setTimeout(() => {
+      isEditInitializing.current = false;
+    }, 0);
   }, [editData, reset]);
+
 
   const answerType = watch("answerType");
 
@@ -91,19 +100,26 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
   }, [answerType]);
 
   useEffect(() => {
+    if (isEditInitializing.current) return;
+
     if (answerType === ANSWER_TYPES.NONE) {
-      setValue("required", false);
-      setValue("validateFormat", false);
-      setValue("validationType", "");
-      setValue("dateFormat", "");
+      setValue("required", false, { shouldDirty: false });
+      setValue("validateFormat", false, { shouldDirty: false });
+      setValue("validationType", "", { shouldDirty: false });
+      setValue("dateFormat", "", { shouldDirty: false });
+      return;
     }
 
-    else if (answerType !== ANSWER_TYPES.SINGLE_TEXT || ANSWER_TYPES.MULTI_TEXT) {
-      setValue("validateFormat", false);
-      setValue("validationType", "");
-      setValue("dateFormat", "");
+    if (!TEXT_BASED_TYPES.includes(answerType)) {
+      setValue("validateFormat", false, { shouldDirty: false });
+      setValue("validationType", "", { shouldDirty: false });
+    }
+
+    if (answerType !== ANSWER_TYPES.DATE) {
+      setValue("dateFormat", "", { shouldDirty: false });
     }
   }, [answerType, setValue]);
+
 
   const onSubmit = (data) => {
     const payload = {
@@ -117,6 +133,7 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
         ? data.options.map(o => o.value).filter(Boolean)
         : [],
       required: data.required,
+      validateFormat: data.validateFormat,
       validationType:
         TEXT_BASED_TYPES.includes(data.answerType) && data.validateFormat
           ? data.validationType
@@ -124,6 +141,8 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
       dateFormat:
         data.answerType === ANSWER_TYPES.DATE ? data.dateFormat : null,
     };
+
+    console.log("payload", payload)
 
     onSuccess(payload);
     onClose();
@@ -216,48 +235,48 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
 
           {/* OPTIONS */}
           {OPTION_BASED_TYPES.includes(answerType) && (
-  <div className="border-t border-gray-300 pt-4 space-y-2">
-    {fields.map((field, index) => (
-      <div key={field.id} className="flex items-start gap-2">
-        
-        {/* Input + Error */}
-        <div className="flex-1">
-          <input
-            {...register(`options.${index}.value`, {
-              required: "Option is required",
-            })}
-            className="w-full border border-gray-300 rounded px-3 py-1"
-          />
+            <div className="border-t border-gray-300 pt-4 space-y-2">
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-start gap-2">
 
-          {errors.options?.[index]?.value && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.options[index].value.message}
-            </p>
+                  {/* Input + Error */}
+                  <div className="flex-1">
+                    <input
+                      {...register(`options.${index}.value`, {
+                        required: "Option is required",
+                      })}
+                      className="w-full border border-gray-300 rounded px-3 py-1"
+                    />
+
+                    {errors.options?.[index]?.value && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.options[index].value.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Buttons */}
+                  <button
+                    type="button"
+                    onClick={() => append({ value: "" })}
+                    className="border-2 border-gray-400 text-gray-400 p-0.5 mt-0.5 rounded-sm"
+                  >
+                    <Plus size={18} />
+                  </button>
+
+                  {fields.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="border-2 border-gray-400 text-gray-400 p-0.5 mt-0.5 rounded-sm"
+                    >
+                      <Minus size={18} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
-        </div>
-
-        {/* Buttons */}
-        <button
-          type="button"
-          onClick={() => append({ value: "" })}
-          className="border-2 border-gray-400 text-gray-400 p-0.5 mt-0.5 rounded-sm"
-        >
-          <Plus size={18} />
-        </button>
-
-        {fields.length > 1 && (
-          <button
-            type="button"
-            onClick={() => remove(index)}
-            className="border-2 border-gray-400 text-gray-400 p-0.5 mt-0.5 rounded-sm"
-          >
-            <Minus size={18} />
-          </button>
-        )}
-      </div>
-    ))}
-  </div>
-)}
 
           {/* REQUIRED / VALIDATION / DATE */}
           {answerType && answerType !== ANSWER_TYPES.NONE && (

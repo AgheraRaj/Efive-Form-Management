@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RotateCcw, Save, Trash2, Upload, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 
 import userImage from "../../assets/users/default_user.png";
@@ -8,10 +9,13 @@ import { createUser, updateUser } from "../../api/user.api";
 
 const AddUser = ({ onBack, editData }) => {
 
+    const fileInputRef = useRef(null);
+
     const isEditMode = Boolean(editData);
 
     const [imagePreview, setImagePreview] = useState(null);
     const [imageFile, setImageFile] = useState(null);
+    const [removeImage, setRemoveImage] = useState(false);
 
     const {
         register,
@@ -68,11 +72,17 @@ const AddUser = ({ onBack, editData }) => {
 
         setImageFile(file);
         setImagePreview(URL.createObjectURL(file));
+        setRemoveImage(false);
     };
 
     const handleRemoveImage = () => {
         setImageFile(null);
         setImagePreview(null);
+        setRemoveImage(true);
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
     const onSubmit = async (data) => {
@@ -82,45 +92,51 @@ const AddUser = ({ onBack, editData }) => {
             formData.append(
                 "user",
                 new Blob(
-                    [JSON.stringify({
-                        firstname: data.firstName,
-                        lastname: data.lastName,
-                        email: data.email,
-                        contactNo: data.contactNo,
-                        gender: data.gender,
-                        validFrom: data.validFrom,
-                        validTo: data.validTo,
-                        role: data.role,
-                    })],
+                    [
+                        JSON.stringify({
+                            firstname: data.firstName,
+                            lastname: data.lastName,
+                            email: data.email,
+                            contactNo: data.contactNo,
+                            gender: data.gender,
+                            validFrom: data.validFrom,
+                            validTo: data.validTo,
+                            role: data.role,
+                        }),
+                    ],
                     { type: "application/json" }
                 )
             );
 
+            if (removeImage) {
+                formData.append("removeProfilePicture", "true");
+            }
+
             if (imageFile) {
                 formData.append("file", imageFile);
             }
+            const res = isEditMode
+                ? await updateUser(editData.id, formData)
+                : await createUser(formData);
 
-            if (isEditMode) {
-                await updateUser(editData.id, formData);
-            } else {
-                await createUser(formData);
-            }
+            toast.success(res?.data?.message || "Saved successfully");
 
             reset();
             setImagePreview(null);
             setImageFile(null);
-            onBack();
 
-        } catch (error) {
-            console.error("User save failed:", error);
-
-            if (error.code === "ECONNABORTED") {
-                alert("Request timed out. Please try again.");
-            } else {
-                alert("Failed to save user.");
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
             }
+
+            onBack();
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to save user"
+            );
         }
     };
+
 
     return (
         <div className="bg-white border border-gray-300 rounded-md shadow-md my-4 mx-8">
@@ -155,6 +171,7 @@ const AddUser = ({ onBack, editData }) => {
                             <Upload size={18} />
                             Upload
                             <input
+                                ref={fileInputRef}
                                 type="file"
                                 accept="image/*"
                                 hidden

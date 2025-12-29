@@ -1,5 +1,6 @@
 import { RotateCcw, Save, X } from "lucide-react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 
 import QuestionTable from "../tables/QuestionTable";
@@ -67,19 +68,31 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
             subCharacteristic: Number(data.subCharacteristic),
             recurrence: Number(data.recurrence),
             startMonth: Number(data.startMonth),
-            questions
+            questions,
         };
 
-        console.log(payload)
+        try {
+            let res;
 
-        if (isEditMode) {
-            await updateForm(editData.id, payload);
-        } else {
-            await postForm(payload);
+            if (isEditMode) {
+                res = await updateForm(editData.id, payload);
+            } else {
+                res = await postForm(payload);
+            }
+
+            toast.success(
+                res?.data?.message ||
+                (isEditMode ? "Form updated successfully" : "Form added successfully")
+            );
+
+            onSuccess?.();
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Something went wrong"
+            );
         }
-
-        onSuccess?.();
     };
+
 
     return (
         <div className="bg-white border border-gray-300 rounded-md shadow-md/30 my-4 mx-8">
@@ -273,16 +286,34 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                         <label className="block mb-1 text-gray-800 font-medium">
                             Compliance Period <span className="text-red-600">*</span>
                         </label>
+
                         <input
-                            {...register("compliancePeriod", { required: "Compliance period is required" })}
-                            type="text"
-                            placeholder="In Months (1-12)"
+                            type="number"
+                            min={1}
+                            max={12}
+                            placeholder="In Months (1–12)"
+                            {...register("compliancePeriod", {
+                                required: "Compliance period is required",
+                                valueAsNumber: true,
+                                min: {
+                                    value: 1,
+                                    message: "Value must be at least 1 month",
+                                },
+                                max: {
+                                    value: 12,
+                                    message: "Value must not exceed 12 months",
+                                },
+                            })}
                             className="w-full px-3 py-0.5 border border-gray-300 rounded"
                         />
+
                         {errors.compliancePeriod && (
-                            <p className="text-red-500 text-xs">{errors.compliancePeriod.message}</p>
+                            <p className="text-red-500 text-xs">
+                                {errors.compliancePeriod.message}
+                            </p>
                         )}
                     </div>
+
 
                     <div className="col-span-3">
                         <label className="block mb-1 text-gray-800 font-medium">

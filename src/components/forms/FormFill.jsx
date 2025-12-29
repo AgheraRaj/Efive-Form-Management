@@ -1,5 +1,8 @@
 import { Printer, Save, X } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+
+
 import { postFilledForm } from "../../api/form.api";
 import MultiSelectDropdown from "../MultiSelectDropdown";
 
@@ -55,25 +58,37 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
     };
 
     const onSubmit = async (data) => {
-        const answeredQuestions = selectedForm.questions.map((q) => {
-            const rawAnswer = data.answers?.[q.id];
+        try {
+            const answeredQuestions = selectedForm.questions.map((q) => {
+                const rawAnswer = data.answers?.[q.id];
 
-            return {
-                questionId: q.id,
-                questionName: q.questionName,
-                description: q.description ?? null,
-                answers: normalizeToArray(rawAnswer),
+                return {
+                    questionId: q.id,
+                    questionName: q.questionName,
+                    description: q.description ?? null,
+                    answers: normalizeToArray(rawAnswer),
+                };
+            });
+
+            const payload = {
+                formId: selectedForm.formId,
+                answeredQuestions,
             };
-        });
 
-        const payload = {
-            formId: selectedForm.formId,
-            answeredQuestions,
-        };
+            const res = await postFilledForm(payload);
 
-        await postFilledForm(payload);
-        onSubmitted?.();
+            toast.success(
+                res?.data?.message || "Form filled successfully"
+            );
+
+            onSubmitted?.();
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to submit form"
+            );
+        }
     };
+
 
     return (
         <form

@@ -24,7 +24,7 @@ const CompletedForm = () => {
   const fetchCompletedForms = async () => {
     try {
       const res = await getCompletedForm();
-      setFormData(res.data);
+      setFormData(res.data.data);
     } catch (error) {
       console.error("Error fetching forms:", error);
     } finally {
