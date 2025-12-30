@@ -7,7 +7,9 @@ import { useModal } from '../../hooks/ModalContext';
 import { useAuth } from '../../hooks/AuthContext';
 
 const HeaderMenu = () => {
+
     const { logout, token } = useAuth();
+
     const navigate = useNavigate();
 
     let role = null;
@@ -22,12 +24,7 @@ const HeaderMenu = () => {
     const profilePath =
         role === "ADMIN" ? "/admin/profile" : "/user/profile";
 
-    const {
-        open,
-        toggleMenu,
-        closeMenu,
-        openChangePassword,
-    } = useModal()
+    const { open, toggleMenu, closeMenu, openChangePassword } = useModal()
 
     return (
         <div className="relative group">

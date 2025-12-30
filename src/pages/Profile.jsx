@@ -11,8 +11,11 @@ const Profile = () => {
     const fileInputRef = useRef(null);
 
     const [uploading, setUploading] = useState(false);
+
     const [activeTab, setActiveTab] = useState("details");
+
     const [profile, setProfile] = useState({});
+
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async () => {
@@ -73,7 +76,6 @@ const Profile = () => {
     return (
         <div className="flex gap-6 p-6">
 
-            {/* LEFT PROFILE CARD */}
             <div className="w-2/7 pb-4 bg-white rounded-sm shadow-md/30 overflow-hidden">
 
                 <div className="h-32 bg-gradient-to-r from-purple-800 to-purple-500" />
@@ -131,15 +133,12 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* RIGHT CONTENT */}
             <div className="flex-1">
                 <div className="bg-[#e9edf3] rounded-t-md flex">
                     <button
                         onClick={() => setActiveTab("details")}
                         className={`flex items-center gap-2 px-3 py-1 text-sm font-medium rounded-sm
-                        ${activeTab === "details"
-                                ? "bg-gray-300 text-black"
-                                : "hover:bg-gray-300 hover:text-white"}`}
+                        ${activeTab === "details" ? "bg-gray-300 text-black" : "hover:bg-gray-300 hover:text-white"}`}
                     >
                         <Users size={16} />
                         User Details
@@ -148,9 +147,7 @@ const Profile = () => {
                     <button
                         onClick={() => setActiveTab("settings")}
                         className={`flex items-center gap-2 px-3 py-1 text-sm font-medium rounded-sm
-                        ${activeTab === "settings"
-                                ? "bg-gray-300 text-black"
-                                : "hover:bg-gray-300 hover:text-white"}`}
+                        ${activeTab === "settings" ? "bg-gray-300 text-black" : "hover:bg-gray-300 hover:text-white"}`}
                     >
                         <Settings size={16} />
                         Settings

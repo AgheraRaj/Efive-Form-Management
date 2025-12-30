@@ -27,24 +27,14 @@ const TEXT_BASED_TYPES = [
 ];
 
 const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
-  const {
-    register,
-    control,
-    watch,
-    setValue,
-    formState: { errors },
-    reset,
-    handleSubmit,
-  } = useForm();
 
-  const validateEnabled = watch("validateFormat");
+  const { register, control, watch, setValue, formState: { errors }, reset, handleSubmit } = useForm();
 
   const isEditInitializing = useRef(false);
 
-  const { fields, append, remove, replace } = useFieldArray({
-    control,
-    name: "options",
-  });
+  const validateEnabled = watch("validateFormat");
+
+  const { fields, append, remove, replace } = useFieldArray({ control, name: "options" });
 
   useEffect(() => {
     if (!editData) {
@@ -142,19 +132,16 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
         data.answerType === ANSWER_TYPES.DATE ? data.dateFormat : null,
     };
 
-    console.log("payload", payload)
-
     onSuccess(payload);
     onClose();
   };
-
 
   return (
     <>
       <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
 
       <div className="fixed top-1/2 left-1/2 z-50 w-4xl -translate-x-1/2 -translate-y-1/2 bg-white rounded-md shadow-lg">
-        {/* Header */}
+
         <div className="flex items-center justify-between bg-[#4169e1] text-white px-4 py-2 rounded-t-md">
           <h3 className="font-semibold text-sm">
             {editData ? "Edit Form Question" : "Add Form Question"}
@@ -165,7 +152,6 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-4 space-y-4 text-sm">
 
           <div className="grid grid-cols-4 items-center gap-3">
@@ -182,7 +168,6 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
             )}
           </div>
 
-          {/* Question Name */}
           <div className="grid grid-cols-4 items-center gap-3">
             <label className="font-medium">
               Question Name <span className="text-red-600">*</span>
@@ -197,7 +182,6 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
             )}
           </div>
 
-          {/* Description */}
           <div className="grid grid-cols-4 gap-3">
             <label className="font-medium">Description</label>
             <textarea
@@ -208,15 +192,12 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
             />
           </div>
 
-          {/* Answer Type */}
           <div className="grid grid-cols-4 items-center gap-3">
             <label className="font-medium">
               Answer Type <span className="text-red-600">*</span>
             </label>
             <select
-              {...register("answerType", {
-                required: "Answer type is required",
-              })}
+              {...register("answerType", { required: "Answer type is required" })}
               className="col-span-3 border border-gray-300 rounded px-3 py-1"
             >
               <option value="">Select Answer Type</option>
@@ -233,18 +214,14 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
             )}
           </div>
 
-          {/* OPTIONS */}
           {OPTION_BASED_TYPES.includes(answerType) && (
             <div className="border-t border-gray-300 pt-4 space-y-2">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex items-start gap-2">
 
-                  {/* Input + Error */}
                   <div className="flex-1">
                     <input
-                      {...register(`options.${index}.value`, {
-                        required: "Option is required",
-                      })}
+                      {...register(`options.${index}.value`, { required: "Option is required" })}
                       className="w-full border border-gray-300 rounded px-3 py-1"
                     />
 
@@ -255,7 +232,6 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
                     )}
                   </div>
 
-                  {/* Buttons */}
                   <button
                     type="button"
                     onClick={() => append({ value: "" })}
@@ -278,7 +254,6 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
             </div>
           )}
 
-          {/* REQUIRED / VALIDATION / DATE */}
           {answerType && answerType !== ANSWER_TYPES.NONE && (
             <div className="border border-gray-300 rounded px-3 py-2 space-y-2">
               <div className="flex items-center space-x-20">
@@ -305,9 +280,7 @@ const AddEditQuestionModal = ({ onClose, onSuccess, editData }) => {
 
                   {validateEnabled && (
                     <select
-                      {...register("validationType", {
-                        required: "Validation type required",
-                      })}
+                      {...register("validationType", { required: "Validation type required" })}
                       className="border border-gray-300 rounded px-3 py-1"
                     >
                       <option value="">Answer Should Be</option>

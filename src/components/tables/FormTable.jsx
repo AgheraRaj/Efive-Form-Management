@@ -9,16 +9,12 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
     const [isOpen, setIsOpen] = useState(false)
     const [selectedForm, setSelectedForm] = useState(null);
 
-    const [sortConfig, setSortConfig] = useState({
-        key: null,
-        direction: null, // "asc" | "desc"
-    });
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
     const [searchValue, setSearchValue] = useState("");
 
-    const sortedForms = !sortConfig.key
-    ? data
-    : [...data].sort((a, b) => {
+    const sortedForms = !sortConfig.key ? data : [...data].sort((a, b) => {
+
         let valueA = a[sortConfig.key];
         let valueB = b[sortConfig.key];
 
@@ -64,7 +60,10 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
             <div className="flex items-center justify-between px-4 py-2 border-b border-b-gray-300">
                 <h2>Form</h2>
 
-                <button type="button" onClick={onAddForm} className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                <button
+                    type="button"
+                    onClick={onAddForm}
+                    className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                     <Plus size={18} />
                     Add Form
                 </button>
@@ -175,14 +174,8 @@ function FormTable({ onAddForm, onSearch, onEditForm, onDeleteForm, data, curren
                         ) : (
                             sortedForms.map((form) => (
                                 <tr key={form.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-2 border-y border-gray-300">
-                                        {form.id}
-                                    </td>
-
-                                    <td className="px-4 py-2 border-y border-gray-300">
-                                        {form.formTitle}
-                                    </td>
-
+                                    <td className="px-4 py-2 border-y border-gray-300">{form.id}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{form.formTitle}</td>
                                     <td className="px-4 py-2 border-y border-gray-300">
                                         <span className="px-2 py-0.5 rounded">
                                             {form.isActive ? "Yes" : "No"}

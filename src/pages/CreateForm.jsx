@@ -7,10 +7,12 @@ import { deleteForm, getForm } from "../api/form.api";
 import Loader from "../components/Loader";
 
 const CreateForm = () => {
-  const [view, setView] = useState("table"); // 'table' | 'add'
+  const [view, setView] = useState("table");
+
   const [editingForm, setEditingForm] = useState(null);
 
   const [formData, setFormData] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1)
@@ -18,16 +20,12 @@ const CreateForm = () => {
 
   const [searchText, setSearchText] = useState("");
 
-  const filteredForms = searchText
-    ? formData.filter((form) =>
-      form.formTitle?.toLowerCase().includes(searchText.toLowerCase())
-    )
-    : formData;
+  const filteredForms = searchText ? formData.filter((form) => form.formTitle?.toLowerCase().includes(searchText.toLowerCase())) : formData;
 
   const fetchForms = async () => {
     try {
       const res = await getForm();
-      console.log("get form",res)
+      console.log("get form", res)
       setFormData(res.data.data);
     } catch (error) {
       console.error("Error fetching forms:", error);
@@ -74,7 +72,6 @@ const CreateForm = () => {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     document.title = "Form Management | CFMS";

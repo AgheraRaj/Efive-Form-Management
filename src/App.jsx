@@ -1,5 +1,7 @@
 import { Route, Routes } from "react-router";
 import { ModalProvider } from "./hooks/ModalContext";
+import { Toaster } from "react-hot-toast";
+
 
 import Login from "./pages/Login";
 import AdminLayout from "./layout/AdminLayout";
@@ -10,7 +12,6 @@ import CompletedForm from "./pages/CompletedForm";
 import User from "./pages/User";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
         {/* Public */}
         <Route path="/" element={<Login />} />
 
-        {/* ADMIN */}
+        {/* Admin */}
         <Route element={<ProtectedRoute allowedRoles={"ADMIN"} />}>
           <Route path="admin" element={<AdminLayout />}>
             <Route path="create-form" element={<CreateForm />} />
@@ -30,7 +31,7 @@ function App() {
           </Route>
         </Route>
 
-        {/* CLIENT */}
+        {/* Client */}
         <Route element={<ProtectedRoute allowedRoles={"CLIENT"} />}>
           <Route path="user" element={<UserLayout />}>
             <Route path="fill-form" element={<FillForm />} />

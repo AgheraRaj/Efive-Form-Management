@@ -10,7 +10,9 @@ import toast from "react-hot-toast";
 
 const User = () => {
     const [view, setView] = useState("table");
+
     const [userData, setUserData] = useState([]);
+
     const [loading, setLoading] = useState(false);
 
     const [editingUser, setEditingUser] = useState(null);

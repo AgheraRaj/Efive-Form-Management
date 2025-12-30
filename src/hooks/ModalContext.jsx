@@ -3,6 +3,7 @@ import { createContext, useContext, useState } from "react"
 const ModalContext = createContext()
 
 export const ModalProvider = ({ children }) => {
+    
     const [isChangePasswordOpen, setChangePasswordOpen] = useState(false)
     const [open, setOpen] = useState(false)
 

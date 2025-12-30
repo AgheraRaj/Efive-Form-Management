@@ -10,14 +10,10 @@ import { useEffect, useState } from "react";
 const AddForm = ({ onBack, onSuccess, editData }) => {
 
     const isEditMode = Boolean(editData);
+    
     const [questions, setQuestions] = useState([]);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset
-    } = useForm({
+    const { register, handleSubmit, formState: { errors }, reset } = useForm({
         defaultValues: {
             title: "",
             alias: "",
@@ -53,6 +49,7 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
         });
 
         setQuestions(editData.questions || []);
+
     }, [editData, reset]);
 
     const onSubmit = async (data) => {
@@ -70,8 +67,6 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
             startMonth: Number(data.startMonth),
             questions,
         };
-
-        console.log("post form", payload)
 
         try {
             let res;
@@ -102,15 +97,16 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
             <div className="flex items-center justify-between px-4 py-2 border-b border-b-gray-300">
                 <h2>{isEditMode ? "Edit Form" : "Add Form"}</h2>
 
-                <button type="button" onClick={onBack} className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                     <RotateCcw size={18} />
                     Move Back
                 </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="px-4 py-3 space-y-5 text-sm">
-
                 <div className="grid grid-cols-12 gap-4">
                     <div className="col-span-2">
                         <label className="block mb-1 text-gray-800 font-medium">Form #</label>
@@ -293,7 +289,7 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                             type="number"
                             min={1}
                             max={12}
-                            placeholder="In Months (1–12)"
+                            placeholder="In Months (1 to 12)"
                             {...register("compliancePeriod", {
                                 required: "Compliance period is required",
                                 valueAsNumber: true,
@@ -361,11 +357,16 @@ const AddForm = ({ onBack, onSuccess, editData }) => {
                 />
 
                 <div className="flex justify-center items-center gap-2 py-2">
-                    <button type="submit" className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                    <button
+                        type="submit"
+                        className="flex items-center gap-2 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                         <Save size={18} />
                         {isEditMode ? "Update" : "Save"}
                     </button>
-                    <button type="button" onClick={onBack} className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="flex items-center gap-1 bg-[#4169e1] text-white px-2 py-1 rounded-sm">
                         <X size={18} />
                         Cancel
                     </button>

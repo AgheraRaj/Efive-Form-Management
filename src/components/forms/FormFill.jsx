@@ -42,12 +42,8 @@ const VALIDATION_RULES = {
 };
 
 const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
-    const {
-        register,
-        handleSubmit,
-        control,
-        formState: { errors },
-    } = useForm();
+
+    const { register, handleSubmit, control, formState: { errors } } = useForm();
 
     if (!selectedForm) return null;
 
@@ -89,7 +85,6 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
         }
     };
 
-
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
@@ -113,7 +108,7 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                     </p>
                 </div>
 
-                {/* QUESTIONS */}
+                {/* questions */}
                 {selectedForm.questions.map((q, index) => {
                     const uiType = ANSWER_TYPE_MAP[q.answerType];
 
@@ -140,14 +135,14 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                     </p>
                                 )}
 
-                                {/* NO ANSWER */}
+                                {/* no answer */}
                                 {uiType === "none" && (
                                     <p className="italic text-gray-500">
                                         No answer required
                                     </p>
                                 )}
 
-                                {/* RADIO */}
+                                {/* radio button */}
                                 {uiType === "radio" && (
                                     <>
                                         <div className="grid grid-cols-5">
@@ -159,13 +154,7 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                                     <input
                                                         type="radio"
                                                         value={opt}
-                                                        {...register(
-                                                            `answers.${q.id}`,
-                                                            {
-                                                                required:
-                                                                    q.required,
-                                                            }
-                                                        )}
+                                                        {...register(`answers.${q.id}`, { required: q.required })}
                                                     />
                                                     {opt}
                                                 </label>
@@ -179,7 +168,7 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                     </>
                                 )}
 
-                                {/* CHECKBOX */}
+                                {/* checkbox */}
                                 {uiType === "checkbox" && (
                                     <>
                                         <div className="grid grid-cols-5">
@@ -191,9 +180,7 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                                     <input
                                                         type="checkbox"
                                                         value={opt}
-                                                        {...register(
-                                                            `answers.${q.id}`
-                                                        )}
+                                                        {...register(`answers.${q.id}`)}
                                                     />
                                                     {opt}
                                                 </label>
@@ -207,17 +194,12 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                     </>
                                 )}
 
-                                {/* TEXT */}
+                                {/* text */}
                                 {uiType === "text" && (
                                     <>
                                         <input
                                             type="text"
-                                            {...register(`answers.${q.id}`, {
-                                                required: q.required,
-                                                ...(q.validationType
-                                                    ? VALIDATION_RULES[q.validationType]
-                                                    : {}),
-                                            })}
+                                            {...register(`answers.${q.id}`, { required: q.required, ...(q.validationType ? VALIDATION_RULES[q.validationType] : {}) })}
                                             className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
                                         />
 
@@ -230,17 +212,12 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                 )}
 
 
-                                {/* TEXTAREA */}
+                                {/* text area */}
                                 {uiType === "textarea" && (
                                     <>
                                         <textarea
                                             rows={3}
-                                            {...register(`answers.${q.id}`, {
-                                                required: q.required,
-                                                ...(q.validationType
-                                                    ? VALIDATION_RULES[q.validationType]
-                                                    : {}),
-                                            })}
+                                            {...register(`answers.${q.id}`, { required: q.required, ...(q.validationType ? VALIDATION_RULES[q.validationType] : {}) })}
                                             className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
                                         />
 
@@ -252,13 +229,11 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                     </>
                                 )}
 
-                                {/* SELECT */}
+                                {/* select dropdown */}
                                 {uiType === "select" && (
                                     <>
                                         <select
-                                            {...register(`answers.${q.id}`, {
-                                                required: q.required,
-                                            })}
+                                            {...register(`answers.${q.id}`, { required: q.required })}
                                             className="w-full sm:w-1/2 lg:w-1/3 border border-gray-300 rounded px-2 py-1"
                                         >
                                             <option value="">Select</option>
@@ -276,7 +251,7 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                     </>
                                 )}
 
-                                {/* MULTI SELECT DROPDOWN */}
+                                {/* multiselect dropdown */}
                                 {uiType === "multiselect" && (
                                     <>
                                         <Controller
@@ -300,14 +275,12 @@ const FormFill = ({ selectedForm, onSubmitted, onClose }) => {
                                     </>
                                 )}
 
-                                {/* DATE */}
+                                {/* date */}
                                 {uiType === "date" && (
                                     <>
                                         <input
                                             type="date"
-                                            {...register(`answers.${q.id}`, {
-                                                required: q.required,
-                                            })}
+                                            {...register(`answers.${q.id}`, { required: q.required })}
                                             className="w-full sm:w-1/3 lg:w-1/5 border border-gray-300 rounded px-2 py-1"
                                         />
                                         {errors.answers?.[q.id] && q.required && (

@@ -17,13 +17,7 @@ const AddUser = ({ onBack, editData }) => {
     const [imageFile, setImageFile] = useState(null);
     const [removeImage, setRemoveImage] = useState(false);
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        watch,
-        formState: { errors, isSubmitting },
-    } = useForm({
+    const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
             firstName: "",
             lastName: "",
@@ -87,6 +81,7 @@ const AddUser = ({ onBack, editData }) => {
 
     const onSubmit = async (data) => {
         try {
+
             const formData = new FormData();
 
             formData.append(
@@ -136,7 +131,6 @@ const AddUser = ({ onBack, editData }) => {
             );
         }
     };
-
 
     return (
         <div className="bg-white border border-gray-300 rounded-md shadow-md my-4 mx-8">
@@ -284,8 +278,7 @@ const AddUser = ({ onBack, editData }) => {
                                         message: "Enter a valid email address",
                                     },
                                 })}
-                                className={`w-full px-3 py-1 border border-gray-300 rounded 
-      ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                                className={`w-full px-3 py-1 border border-gray-300 rounded ${isEditMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
                             />
 
                             {errors.email && (
@@ -402,8 +395,7 @@ const AddUser = ({ onBack, editData }) => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className={`flex items-center gap-2 px-3 py-1 rounded-sm text-white 
-      ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#4169e1]"}`}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-sm text-white ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-[#4169e1]"}`}
                         >
                             <Save size={18} />
                             {isSubmitting ? "Saving..." : isEditMode ? "Update" : "Save"}

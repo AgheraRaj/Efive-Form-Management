@@ -1,20 +1,15 @@
 import { Save, X } from "lucide-react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 
 import { useModal } from "../../hooks/ModalContext";
 import { changePasswordApi } from "../../api/user.api";
-import toast from "react-hot-toast";
 
 const ChangePasswordModal = () => {
     const { closeChangePassword } = useModal();
 
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors, isSubmitting },
-    } = useForm({
+    const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
             currentPassword: "",
             newPassword: "",
@@ -64,9 +59,7 @@ const ChangePasswordModal = () => {
                         <input
                             type="password"
                             className="border border-gray-300 rounded px-3 py-0.5"
-                            {...register("currentPassword", {
-                                required: "Current password is required",
-                            })}
+                            {...register("currentPassword", { required: "Current password is required" })}
                         />
                         {errors.currentPassword && (
                             <p className="text-red-500 text-xs">
@@ -80,9 +73,7 @@ const ChangePasswordModal = () => {
                         <input
                             type="password"
                             className="border border-gray-300 rounded px-3 py-0.5"
-                            {...register("newPassword", {
-                                required: "New password is required"
-                            })}
+                            {...register("newPassword", { required: "New password is required" })}
                         />
                         {errors.newPassword && (
                             <p className="text-red-500 text-xs">
@@ -96,11 +87,7 @@ const ChangePasswordModal = () => {
                         <input
                             type="password"
                             className="border border-gray-300 rounded px-3 py-0.5"
-                            {...register("confirmPassword", {
-                                required: "Please re-type new password",
-                                validate: (value) =>
-                                    value === newPassword || "Passwords do not match",
-                            })}
+                            {...register("confirmPassword", { required: "Please re-type new password", validate: (value) => value === newPassword || "Passwords do not match" })}
                         />
                         {errors.confirmPassword && (
                             <p className="text-red-500 text-xs">

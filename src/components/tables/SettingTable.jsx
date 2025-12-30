@@ -27,10 +27,7 @@ const SettingTable = () => {
     const handleToggle = (id, type) => {
         setNotificationSettings(prev => ({
             ...prev,
-            [id]: {
-                ...prev[id],
-                [type]: !prev[id][type],
-            },
+            [id]: { ...prev[id], [type]: !prev[id][type] }
         }));
     };
 
@@ -91,6 +88,5 @@ const SettingTable = () => {
         </>
     );
 };
-
 
 export default SettingTable

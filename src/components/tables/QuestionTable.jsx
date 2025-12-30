@@ -9,17 +9,15 @@ import AddEditQuestionModal from "../modals/AddEditQuestionModal";
 const QuestionTable = ({ questions, setQuestions }) => {
 
     const [openAddEdit, setOpenAddEdit] = useState(false);
-    const [selectedQuestion, setSelectedQuestion] = useState(null);
     const [openQuestionModal, setOpenQuestionModal] = useState(false);
+
+    const [selectedQuestion, setSelectedQuestion] = useState(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const dataInTable = 5;
 
     const [searchText, setSearchText] = useState("");
-    const [sortConfig, setSortConfig] = useState({
-        key: null,
-        direction: null,
-    });
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
     const filteredQuestions = questions.filter((q) =>
         q.questionName?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -43,16 +41,9 @@ const QuestionTable = ({ questions, setQuestions }) => {
 
     const saveQuestion = (question) => {
         setQuestions(prev => {
-            const exists = prev.find(q =>
-                q.id ? q.id === question.id : q.tempId === question.tempId
-            );
-            return exists
-                ? prev.map(q =>
-                    q.id === question.id || q.tempId === question.tempId
-                        ? question
-                        : q
-                )
-                : [...prev, question];
+            const exists = prev.find(q => q.id ? q.id === question.id : q.tempId === question.tempId);
+
+            return exists ? prev.map(q => q.id === question.id || q.tempId === question.tempId ? question : q) : [...prev, question];
         });
     };
 
@@ -60,13 +51,7 @@ const QuestionTable = ({ questions, setQuestions }) => {
         const confirmDelete = window.confirm("Delete this question?");
         if (!confirmDelete) return;
 
-        setQuestions((prev) =>
-            prev.filter((q) =>
-                question.id
-                    ? q.id !== question.id
-                    : q.tempId !== question.tempId
-            )
-        );
+        setQuestions((prev) => prev.filter((q) => question.id ? q.id !== question.id : q.tempId !== question.tempId));
 
         toast.success("Question deleted successfully");
     };
@@ -247,21 +232,10 @@ const QuestionTable = ({ questions, setQuestions }) => {
                         ) : (
                             paginatedQuestions.map((question, index) => (
                                 <tr key={question.id || question.tempId} className="hover:bg-gray-50">
-                                    <td className="px-4 py-2 border-y border-gray-300">
-                                        {index + 1}
-                                    </td>
-
-                                    <td className="px-4 py-2 border-y border-gray-300">
-                                        {question.questionName}
-                                    </td>
-
-                                    <td className="px-4 py-2 border-y border-gray-300">
-                                        {question.answerType}
-                                    </td>
-
-                                    <td className="px-4 py-2 border-y border-gray-300">
-                                        {question.required ? "Yes" : "No"}
-                                    </td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{index + 1}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{question.questionName}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{question.answerType}</td>
+                                    <td className="px-4 py-2 border-y border-gray-300">{question.required ? "Yes" : "No"}</td>
 
                                     <td className="px-4 py-2 border-l border-b border-gray-300">
                                         <div className="flex items-center justify-center gap-3">

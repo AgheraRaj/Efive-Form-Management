@@ -2,19 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const MultiSelectDropdown = ({ options = [], value = [], onChange }) => {
+
     const [open, setOpen] = useState(false);
+
     const ref = useRef(null);
 
-    // close dropdown on outside click
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (ref.current && !ref.current.contains(e.target)) {
                 setOpen(false);
             }
         };
+
         document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
+
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const toggleOption = (opt) => {
@@ -30,7 +32,6 @@ const MultiSelectDropdown = ({ options = [], value = [], onChange }) => {
 
     return (
         <div ref={ref} className="relative w-full sm:w-1/2 lg:w-1/3">
-            {/* INPUT */}
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
@@ -42,10 +43,9 @@ const MultiSelectDropdown = ({ options = [], value = [], onChange }) => {
                 <ChevronDown size={16} />
             </button>
 
-            {/* DROPDOWN */}
             {open && (
                 <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow-md">
-                    {/* HEADER */}
+
                     <div className="flex text-sm border-b border-gray-300">
                         <button
                             type="button"
@@ -63,7 +63,6 @@ const MultiSelectDropdown = ({ options = [], value = [], onChange }) => {
                         </button>
                     </div>
 
-                    {/* OPTIONS */}
                     <div className="max-h-48 overflow-y-auto">
                         {options.map((opt, i) => (
                             <label

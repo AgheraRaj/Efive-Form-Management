@@ -4,35 +4,34 @@ import { useState } from "react";
 import FormPreviewSidebar from "../forms/FormPreviewSidebar";
 
 const CompletedFormTable = ({ data, currentPage, totalPages, totalRecords, pageSize, onPageChange, onSearch }) => {
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     const [selectedForm, setSelectedForm] = useState(null);
-    const [sortConfig, setSortConfig] = useState({
-        key: null,
-        direction: null, // "asc" | "desc"
-    });
 
-    const sortedForms = !sortConfig.key
-        ? data
-        : [...data].sort((a, b) => {
-            let valueA = a[sortConfig.key];
-            let valueB = b[sortConfig.key];
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
-            if (sortConfig.key === "completedDate") {
-                return sortConfig.direction === "asc"
-                    ? new Date(valueA) - new Date(valueB)
-                    : new Date(valueB) - new Date(valueA);
-            }
+    const sortedForms = !sortConfig.key ? data : [...data].sort((a, b) => {
 
-            if (typeof valueA === "number") {
-                return sortConfig.direction === "asc"
-                    ? valueA - valueB
-                    : valueB - valueA;
-            }
+        let valueA = a[sortConfig.key];
+        let valueB = b[sortConfig.key];
 
+        if (sortConfig.key === "completedDate") {
             return sortConfig.direction === "asc"
-                ? String(valueA).localeCompare(String(valueB))
-                : String(valueB).localeCompare(String(valueA));
-        });
+                ? new Date(valueA) - new Date(valueB)
+                : new Date(valueB) - new Date(valueA);
+        }
+
+        if (typeof valueA === "number") {
+            return sortConfig.direction === "asc"
+                ? valueA - valueB
+                : valueB - valueA;
+        }
+
+        return sortConfig.direction === "asc"
+            ? String(valueA).localeCompare(String(valueB))
+            : String(valueB).localeCompare(String(valueA));
+    });
 
 
     const handleSort = (key, direction) => {

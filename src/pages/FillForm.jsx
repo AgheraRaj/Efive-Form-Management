@@ -9,7 +9,9 @@ import { getFormById, getOption } from "../api/form.api";
 const FillForm = () => {
 
   const [formTitle, setFormTitle] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [selectedForm, setSelectedForm] = useState(null);
 
   const fetchFormTitles = async () => {
@@ -43,12 +45,12 @@ const FillForm = () => {
   }
   const handleFormSubmitted = () => {
     fetchFormTitles();
-    setSelectedForm(null); 
+    setSelectedForm(null);
   };
 
   const onClose = () => {
     setSelectedForm(null);
-    }
+  }
 
   return (
     <div>

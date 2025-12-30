@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../hooks/AuthContext";
 
 const ProtectedRoute = ({ allowedRoles }) => {
+  
   const { token } = useAuth();
 
   if (!token) {

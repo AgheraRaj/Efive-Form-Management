@@ -22,15 +22,9 @@ function Login() {
         document.title = "Login";
     }, []);
 
-
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-    } = useForm()
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm()
 
     const onSubmit = async (data) => {
-
         try {
             setLoginError("");
             const res = await loginApi(data);
@@ -39,9 +33,7 @@ function Login() {
             console.log(res)
 
             navigate(
-                jwtDecode(res.data.data.token).role === "ADMIN"
-                    ? "/admin/create-form"
-                    : "/user/fill-form",
+                jwtDecode(res.data.data.token).role === "ADMIN" ? "/admin/create-form" : "/user/fill-form",
                 { replace: true }
             );
         } catch (error) {

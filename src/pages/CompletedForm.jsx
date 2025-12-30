@@ -6,7 +6,9 @@ import { getCompletedForm } from '../api/form.api';
 import Loader from '../components/Loader';
 
 const CompletedForm = () => {
+
   const [formData, setFormData] = useState([]);
+  
   const [loading, setLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1)

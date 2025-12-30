@@ -87,16 +87,16 @@ const FormPreviewSidebar = ({ isOpen, onClose, form }) => {
                           </p>
                         </>
                       )}
+
                     </div>
-                  </div>
-                );
+
+                  </div>);
               })}
             </>
           )}
         </div>
       </div>
-    </>
-  );
+    </>);
 };
 
 export default FormPreviewSidebar;

@@ -26,7 +26,6 @@ export const createUser = (payload) => {
 } 
 
 export const updateUser = (id, formData) => {
-  // console.log([...formData.entries()]);
   return api.put(`/user/editUser/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });

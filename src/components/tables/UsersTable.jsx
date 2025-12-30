@@ -2,42 +2,38 @@ import { Plus, Pencil, Trash2, ChevronsRight, ChevronsLeft, ChevronDown, Chevron
 import { useState } from "react";
 
 const UsersTable = ({ onAddForm, onEditUser, onDeleteUser, data, currentPage, totalPages, totalRecords, pageSize, onPageChange, onSearch }) => {
-    
-    const [sortConfig, setSortConfig] = useState({
-        key: null,
-        direction: null, // "asc" | "desc"
-    });
 
-    const sortedUsers = !sortConfig.key
-        ? data
-        : [...data].sort((a, b) => {
-            let valueA = a[sortConfig.key];
-            let valueB = b[sortConfig.key];
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
-            if (typeof valueA === "boolean") {
-                valueA = valueA ? 1 : 0;
-                valueB = valueB ? 1 : 0;
-            }
+    const sortedUsers = !sortConfig.key ? data : [...data].sort((a, b) => {
 
-            if (typeof valueA === "number") {
-                return sortConfig.direction === "asc"
-                    ? valueA - valueB
-                    : valueB - valueA;
-            }
+        let valueA = a[sortConfig.key];
+        let valueB = b[sortConfig.key];
 
-            if (
-                sortConfig.key === "validFrom" ||
-                sortConfig.key === "validTo"
-            ) {
-                return sortConfig.direction === "asc"
-                    ? new Date(valueA) - new Date(valueB)
-                    : new Date(valueB) - new Date(valueA);
-            }
+        if (typeof valueA === "boolean") {
+            valueA = valueA ? 1 : 0;
+            valueB = valueB ? 1 : 0;
+        }
 
+        if (typeof valueA === "number") {
             return sortConfig.direction === "asc"
-                ? String(valueA).localeCompare(String(valueB))
-                : String(valueB).localeCompare(String(valueA));
-        });
+                ? valueA - valueB
+                : valueB - valueA;
+        }
+
+        if (
+            sortConfig.key === "validFrom" ||
+            sortConfig.key === "validTo"
+        ) {
+            return sortConfig.direction === "asc"
+                ? new Date(valueA) - new Date(valueB)
+                : new Date(valueB) - new Date(valueA);
+        }
+
+        return sortConfig.direction === "asc"
+            ? String(valueA).localeCompare(String(valueB))
+            : String(valueB).localeCompare(String(valueA));
+    });
 
 
     const handleSort = (key, direction) => {

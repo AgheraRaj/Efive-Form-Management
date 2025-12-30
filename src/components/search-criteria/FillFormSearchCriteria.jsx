@@ -5,16 +5,11 @@ import { useForm } from "react-hook-form";
 const FillFormSearchCriteria = ({ formTitle, onSearch, onClose }) => {
   const [open, setOpen] = useState(true);
 
-  const {
-    register,
-    handleSubmit,
-    reset
-  } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       formId: "",
     },
   });
-
 
   const onSubmit = (data) => {
     if (!data.formId) return;
@@ -34,10 +29,7 @@ const FillFormSearchCriteria = ({ formTitle, onSearch, onClose }) => {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 px-4 py-1 cursor-pointer select-none"
       >
-        <div
-          className={`transition-transform duration-300 ${open ? "rotate-180" : ""
-            }`}
-        >
+        <div className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
           {open ? (
             <Minus size={15} strokeWidth={4} />
           ) : (
@@ -47,10 +39,7 @@ const FillFormSearchCriteria = ({ formTitle, onSearch, onClose }) => {
         <span className="font-medium">Search Criteria</span>
       </div>
 
-      <div
-        className={`overflow-hidden transition-all duration-300 ${open ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-          }`}
-      >
+      <div className={`overflow-hidden transition-all duration-300 ${open ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`} >
         <div className="px-4 py-2 border-t border-gray-300">
           <form
             onSubmit={handleSubmit(onSubmit)}

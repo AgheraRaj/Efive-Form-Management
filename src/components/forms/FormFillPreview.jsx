@@ -1,9 +1,10 @@
 import { Controller, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { Printer, Save, X } from "lucide-react";
+
 
 import { postFilledForm } from "../../api/form.api";
-import { Printer, Save, X } from "lucide-react";
 import MultiSelectDropdown from "../MultiSelectDropdown";
-import toast from "react-hot-toast";
 
 
 const ANSWER_TYPE_MAP = {
@@ -43,7 +44,7 @@ const VALIDATION_RULES = {
 
 const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
 
-    const { register, handleSubmit, control, formState: { errors }, } = useForm();
+    const { register, handleSubmit, control, formState: { errors } } = useForm();
 
     if (!selectedForm) return null;
 
@@ -54,36 +55,36 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
     };
 
     const onSubmit = async (data) => {
-  try {
-    const answeredQuestions = selectedForm.questions.map((q) => {
-      const rawAnswer = data.answers?.[q.id];
+        try {
+            const answeredQuestions = selectedForm.questions.map((q) => {
+                const rawAnswer = data.answers?.[q.id];
 
-      return {
-        questionId: q.id,
-        questionName: q.questionName,
-        description: q.description ?? null,
-        answers: normalizeToArray(rawAnswer),
-      };
-    });
+                return {
+                    questionId: q.id,
+                    questionName: q.questionName,
+                    description: q.description ?? null,
+                    answers: normalizeToArray(rawAnswer),
+                };
+            });
 
-    const payload = {
-      formId: selectedForm.formId,
-      answeredQuestions,
+            const payload = {
+                formId: selectedForm.formId,
+                answeredQuestions,
+            };
+
+            const res = await postFilledForm(payload);
+
+            toast.success(
+                res?.data?.message || "Form submitted successfully"
+            );
+
+            onSubmitted?.();
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Failed to submit form"
+            );
+        }
     };
-
-    const res = await postFilledForm(payload);
-
-    toast.success(
-      res?.data?.message || "Form submitted successfully"
-    );
-
-    onSubmitted?.();
-  } catch (error) {
-    toast.error(
-      error?.response?.data?.message || "Failed to submit form"
-    );
-  }
-};
 
     return (
         <>
@@ -95,11 +96,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
             )}
 
             {/* Sidebar */}
-            <div
-                className={`fixed top-0 right-0 z-50 h-screen w-2/3 bg-[#f3f3f3]
-                shadow-2xl transform transition-transform duration-300
-                ${isOpen ? "translate-x-0" : "translate-x-full"}`}
-            >
+            <div className={`fixed top-0 right-0 z-50 h-screen w-2/3 bg-[#f3f3f3] shadow-2xl transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"}`} >
 
                 <div className="flex items-center justify-between px-4 py-2 bg-[#4169e1] text-white sticky top-0 z-10">
                     <h2 className="font-medium text-sm">Question Preview</h2>
@@ -158,6 +155,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                 </p>
                                             )}
 
+                                            {/* radio button */}
                                             {uiType === "radio" && (
                                                 <>
                                                     <div className="grid grid-cols-4">
@@ -168,14 +166,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                             >
                                                                 <input
                                                                     type="radio"
-                                                                    value={opt}
-                                                                    {...register(
-                                                                        `answers.${q.id}`,
-                                                                        {
-                                                                            required:
-                                                                                q.required,
-                                                                        }
-                                                                    )}
+                                                                    value={opt}{...register(`answers.${q.id}`, { required: q.required })}
                                                                 />
                                                                 {opt}
                                                             </label>
@@ -190,6 +181,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
 
                                             )}
 
+                                            {/* checkbox */}
                                             {uiType === "checkbox" && (
                                                 <>
                                                     <div className="grid grid-cols-4">
@@ -201,9 +193,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                                 <input
                                                                     type="checkbox"
                                                                     value={opt}
-                                                                    {...register(
-                                                                        `answers.${q.id}`
-                                                                    )}
+                                                                    {...register(`answers.${q.id}`)}
                                                                 />
                                                                 {opt}
                                                             </label>
@@ -214,21 +204,15 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                             This question is required
                                                         </p>
                                                     )}
-
                                                 </>
-
                                             )}
 
+                                            {/* text input */}
                                             {uiType === "text" && (
                                                 <>
                                                     <input
                                                         type="text"
-                                                        {...register(`answers.${q.id}`, {
-                                                            required: q.required,
-                                                            ...(q.validationType
-                                                                ? VALIDATION_RULES[q.validationType]
-                                                                : {}),
-                                                        })}
+                                                        {...register(`answers.${q.id}`, { required: q.required, ...(q.validationType ? VALIDATION_RULES[q.validationType] : {}) })}
                                                         className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
                                                     />
 
@@ -240,16 +224,12 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                 </>
                                             )}
 
+                                            {/* text area */}
                                             {uiType === "textarea" && (
                                                 <>
                                                     <textarea
                                                         rows={3}
-                                                        {...register(`answers.${q.id}`, {
-                                                            required: q.required,
-                                                            ...(q.validationType
-                                                                ? VALIDATION_RULES[q.validationType]
-                                                                : {}),
-                                                        })}
+                                                        {...register(`answers.${q.id}`, { required: q.required, ...(q.validationType ? VALIDATION_RULES[q.validationType] : {}) })}
                                                         className="w-full sm:w-2/3 lg:w-1/2 border border-gray-300 rounded px-2 py-1"
                                                     />
 
@@ -261,12 +241,11 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                 </>
                                             )}
 
+                                            {/* select dropdown */}
                                             {uiType === "select" && (
                                                 <>
                                                     <select
-                                                        {...register(`answers.${q.id}`, {
-                                                            required: q.required,
-                                                        })}
+                                                        {...register(`answers.${q.id}`, { required: q.required })}
                                                         className="w-full sm:w-1/2 border border-gray-300 rounded px-2 py-1"
                                                     >
                                                         <option value="">Select</option>
@@ -284,6 +263,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                 </>
                                             )}
 
+                                            {/* multiselect dropdown */}
                                             {uiType === "multiselect" && (
                                                 <>
                                                     <Controller
@@ -311,9 +291,7 @@ const FormFillPreview = ({ selectedForm, onSubmitted, onClose, isOpen }) => {
                                                 <>
                                                     <input
                                                         type="date"
-                                                        {...register(`answers.${q.id}`, {
-                                                            required: q.required,
-                                                        })}
+                                                        {...register(`answers.${q.id}`, { required: q.required })}
                                                         className="w-full sm:w-1/3 border border-gray-300 rounded px-2 py-1"
                                                     />
                                                     {errors.answers?.[q.id] && q.required && (
